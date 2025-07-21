@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build artifacts that shouldn't be committed
+index-*.js
+index-*.css

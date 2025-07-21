@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 
 // Simple fallback Button component
 const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & {
