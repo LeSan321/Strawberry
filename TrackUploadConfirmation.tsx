@@ -3,7 +3,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, Music, Share2, Eye, EyeOff, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import MoodTagDisplay from "./MoodTagDisplay";
 
 // Simple fallback Button component

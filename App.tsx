@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Container, Theme } from './settings/types';
-import StrawberryRiffApp from './components/generated/StrawberryRiffApp';
+import { Container, Theme } from './types';
+import StrawberryRiffApp from './StrawberryRiffApp';
 
 let theme: Theme = 'light';
 let container: Container = 'none';
