@@ -6,6 +6,7 @@ export interface UploadTrackData {
   tags: string[]
   customMood?: string
   visibility: 'private' | 'inner-circle' | 'public'
+  userId: string // Pass authenticated user ID from the calling function
 }
 
 export async function uploadTrackToSupabase(data: UploadTrackData): Promise<Track> {
@@ -13,24 +14,9 @@ export async function uploadTrackToSupabase(data: UploadTrackData): Promise<Trac
     throw new Error('Supabase client not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.')
   }
 
-  const { file, title, tags, customMood, visibility } = data
+  const { file, title, tags, customMood, visibility, userId } = data
   
-  console.log('Starting upload process for:', { title, tags, customMood, visibility })
-  
-  const { data: { session }, error: authError } = await supabase.auth.getSession()
-  
-  if (authError) {
-    console.error('Auth error:', authError)
-    throw new Error(`Authentication failed: ${authError.message}`)
-  }
-  
-  if (!session || !session.user) {
-    console.error('No authenticated session found')
-    throw new Error('You must be logged in to upload tracks. Please sign in and try again.')
-  }
-  
-  const user_id = session.user.id
-  console.log('Authenticated user ID:', user_id)
+  console.log('Starting upload process for:', { title, tags, customMood, visibility, userId })
   
   const fileExt = file.name.split('.').pop()
   const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`
@@ -52,7 +38,7 @@ export async function uploadTrackToSupabase(data: UploadTrackData): Promise<Trac
   const allTags = customMood ? [...tags, customMood] : tags
 
   const trackData = {
-    user_id: user_id,
+    user_id: userId,
     title: title,
     audio_url: filePath,
     tags: allTags,
