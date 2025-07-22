@@ -26,3 +26,6 @@ dist-ssr
 # Build artifacts that shouldn't be committed
 index-*.js
 index-*.css
+
+# Environment variables
+.env
