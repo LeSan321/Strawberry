@@ -4,6 +4,7 @@ import { Upload, Music, FileAudio, CheckCircle, X, Sparkles, Zap, Users } from '
 import TagTheMoodFeature from './TagTheMoodFeature';
 import TrackUploadConfirmation from './TrackUploadConfirmation';
 import { uploadTrackToSupabase } from './lib/uploadUtils';
+import { supabase } from './lib/supabase';
 interface UploadedFile {
   id: string;
   name: string;
@@ -21,6 +22,7 @@ const UploadMusicPage: React.FC = () => {
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [customMood, setCustomMood] = useState<string>();
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const features = [{
     icon: Sparkles,
@@ -135,6 +137,29 @@ const UploadMusicPage: React.FC = () => {
       
       setUploadError(undefined);
       
+      if (!supabase) {
+        throw new Error('Supabase client not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+      }
+
+      console.log('Checking authentication session...');
+      setIsCheckingAuth(true);
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      
+      console.log('Session check result:', { session: session ? 'found' : 'null', user: session?.user ? 'found' : 'null', authError });
+      
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw new Error(`Authentication failed: ${authError.message}`);
+      }
+      
+      if (!session || !session.user) {
+        console.error('No authenticated session found. Session:', session);
+        throw new Error('You must be logged in to upload tracks. Please sign in and try again.');
+      }
+      
+      const userId = session.user.id;
+      console.log('Authenticated user ID:', userId);
+      
       setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
         ...f,
         status: 'uploading',
@@ -146,10 +171,13 @@ const UploadMusicPage: React.FC = () => {
         title: uploadedFile.name.replace(/\.[^/.]+$/, ""),
         tags: selectedMoods,
         customMood: customMood,
-        visibility: shareLevel
+        visibility: shareLevel,
+        userId: userId
       });
 
       console.log('Upload successful! Track created:', result);
+      
+      setIsCheckingAuth(false);
       
       // Complete the progress to 100%
       setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
@@ -171,6 +199,7 @@ const UploadMusicPage: React.FC = () => {
       console.error('Upload failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Upload failed';
       
+      setIsCheckingAuth(false);
       setUploadError(errorMessage);
       
       setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
@@ -321,7 +350,7 @@ const UploadMusicPage: React.FC = () => {
               file={uploadedFiles[0]?.file} 
               onConfirm={handleConfirmUpload} 
               onEdit={handleEditDetails}
-              isUploading={uploadedFiles.some(f => f.status === 'uploading' && f.progress >= 95)}
+              isUploading={uploadedFiles.some(f => f.status === 'uploading' && f.progress >= 95) || isCheckingAuth}
               uploadError={uploadError}
             />
           </motion.div>}
