@@ -78,6 +78,7 @@ interface TrackUploadConfirmationProps {
   onConfirm?: (shareLevel: 'private' | 'inner-circle' | 'public') => void;
   onEdit?: () => void;
   className?: string;
+  isUploading?: boolean;
 }
 export default function TrackUploadConfirmation({
   trackName,
@@ -85,7 +86,8 @@ export default function TrackUploadConfirmation({
   customMood,
   onConfirm,
   onEdit,
-  className = ""
+  className = "",
+  isUploading = false
 }: TrackUploadConfirmationProps) {
   const [shareLevel, setShareLevel] = React.useState<'private' | 'inner-circle' | 'public'>('private');
   const shareOptions = [{
@@ -201,16 +203,27 @@ export default function TrackUploadConfirmation({
               Edit Details
             </Button>
             
-            <Button onClick={() => {
-            console.log('Confirming upload with:', {
-              trackName,
-              moods,
-              customMood,
-              shareLevel
-            });
-            onConfirm?.(shareLevel);
-          }} className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
-              Share Your Riff
+            <Button 
+              onClick={() => {
+                console.log('Confirming upload with:', {
+                  trackName,
+                  moods,
+                  customMood,
+                  shareLevel
+                });
+                onConfirm?.(shareLevel);
+              }} 
+              disabled={isUploading}
+              className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUploading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Sharing...</span>
+                </div>
+              ) : (
+                'Share Your Riff'
+              )}
             </Button>
           </div>
 

@@ -130,13 +130,15 @@ const UploadMusicPage: React.FC = () => {
     if (!uploadedFile) return;
 
     try {
+      console.log('Starting final upload with share level:', shareLevel);
+      
       setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
         ...f,
         status: 'uploading',
         progress: 95
       } : f));
 
-      await uploadTrackToSupabase({
+      const result = await uploadTrackToSupabase({
         file: uploadedFile.file,
         title: uploadedFile.name.replace(/\.[^/.]+$/, ""),
         tags: selectedMoods,
@@ -144,21 +146,33 @@ const UploadMusicPage: React.FC = () => {
         visibility: shareLevel
       });
 
-      console.log('Upload successful!');
+      console.log('Upload successful! Track created:', result);
       
-      // Reset the form
-      setUploadedFiles([]);
-      setShowMoodTagger(false);
-      setShowConfirmation(false);
-      setSelectedMoods([]);
-      setCustomMood(undefined);
+      // Complete the progress to 100%
+      setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
+        ...f,
+        status: 'completed',
+        progress: 100
+      } : f));
+      
+      setTimeout(() => {
+        // Reset the form
+        setUploadedFiles([]);
+        setShowMoodTagger(false);
+        setShowConfirmation(false);
+        setSelectedMoods([]);
+        setCustomMood(undefined);
+      }, 2000);
+      
     } catch (error) {
       console.error('Upload failed:', error);
       setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
         ...f,
         status: 'error',
+        progress: 0,
         error: error instanceof Error ? error.message : 'Upload failed'
       } : f));
+      
     }
   };
   const handleEditDetails = () => {
@@ -288,7 +302,15 @@ const UploadMusicPage: React.FC = () => {
         duration: 0.6,
         delay: 0.2
       }}>
-            <TrackUploadConfirmation trackName={uploadedFiles[0]?.name || "Unknown Track"} moods={selectedMoods} customMood={customMood} file={uploadedFiles[0]?.file} onConfirm={handleConfirmUpload} onEdit={handleEditDetails} />
+            <TrackUploadConfirmation 
+              trackName={uploadedFiles[0]?.name || "Unknown Track"} 
+              moods={selectedMoods} 
+              customMood={customMood} 
+              file={uploadedFiles[0]?.file} 
+              onConfirm={handleConfirmUpload} 
+              onEdit={handleEditDetails}
+              isUploading={uploadedFiles.some(f => f.status === 'uploading' && f.progress >= 95)}
+            />
           </motion.div>}
 
         {/* Mood Tagger */}
