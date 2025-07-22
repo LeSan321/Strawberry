@@ -74,7 +74,8 @@ interface TrackUploadConfirmationProps {
   trackName: string;
   moods: string[];
   customMood?: string;
-  onConfirm?: () => void;
+  file?: File;
+  onConfirm?: (shareLevel: 'private' | 'inner-circle' | 'public') => void;
   onEdit?: () => void;
   className?: string;
 }
@@ -207,7 +208,7 @@ export default function TrackUploadConfirmation({
               customMood,
               shareLevel
             });
-            onConfirm?.();
+            onConfirm?.(shareLevel);
           }} className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
               Share Your Riff
             </Button>

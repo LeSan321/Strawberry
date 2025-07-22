@@ -3,12 +3,15 @@ import { motion } from 'framer-motion';
 import { Upload, Music, FileAudio, CheckCircle, X, Sparkles, Zap, Users } from 'lucide-react';
 import TagTheMoodFeature from './TagTheMoodFeature';
 import TrackUploadConfirmation from './TrackUploadConfirmation';
+import { uploadTrackToSupabase } from './lib/uploadUtils';
 interface UploadedFile {
   id: string;
   name: string;
   size: string;
   status: 'uploading' | 'completed' | 'error';
   progress: number;
+  file: File;
+  error?: string;
 }
 const UploadMusicPage: React.FC = () => {
   const [dragActive, setDragActive] = useState(false);
@@ -65,27 +68,28 @@ const UploadMusicPage: React.FC = () => {
           name: file.name,
           size: formatFileSize(file.size),
           status: 'uploading',
-          progress: 0
+          progress: 0,
+          file: file
         };
         setUploadedFiles(prev => [...prev, newFile]);
 
-        // Simulate upload progress
-        const interval = setInterval(() => {
+        // Simulate progress updates
+        const progressInterval = setInterval(() => {
           setUploadedFiles(prev => prev.map(f => f.id === newFile.id ? {
             ...f,
-            progress: Math.min(f.progress + 10, 100)
+            progress: Math.min(f.progress + 20, 90)
           } : f));
-        }, 200);
+        }, 300);
 
-        // Complete upload after 2 seconds and show mood tagger
+        // Complete progress simulation after 2 seconds
         setTimeout(() => {
-          clearInterval(interval);
+          clearInterval(progressInterval);
           setUploadedFiles(prev => prev.map(f => f.id === newFile.id ? {
             ...f,
             status: 'completed',
             progress: 100
           } : f));
-          // Show mood tagger after first successful upload
+          
           if (!showMoodTagger) {
             setShowMoodTagger(true);
           }
@@ -121,14 +125,41 @@ const UploadMusicPage: React.FC = () => {
       }, 1000);
     }
   };
-  const handleConfirmUpload = () => {
-    console.log('Upload confirmed!');
-    // Reset the form
-    setUploadedFiles([]);
-    setShowMoodTagger(false);
-    setShowConfirmation(false);
-    setSelectedMoods([]);
-    setCustomMood(undefined);
+  const handleConfirmUpload = async (shareLevel: 'private' | 'inner-circle' | 'public') => {
+    const uploadedFile = uploadedFiles.find(f => f.status === 'completed');
+    if (!uploadedFile) return;
+
+    try {
+      setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
+        ...f,
+        status: 'uploading',
+        progress: 95
+      } : f));
+
+      await uploadTrackToSupabase({
+        file: uploadedFile.file,
+        title: uploadedFile.name.replace(/\.[^/.]+$/, ""),
+        tags: selectedMoods,
+        customMood: customMood,
+        visibility: shareLevel
+      });
+
+      console.log('Upload successful!');
+      
+      // Reset the form
+      setUploadedFiles([]);
+      setShowMoodTagger(false);
+      setShowConfirmation(false);
+      setSelectedMoods([]);
+      setCustomMood(undefined);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
+        ...f,
+        status: 'error',
+        error: error instanceof Error ? error.message : 'Upload failed'
+      } : f));
+    }
   };
   const handleEditDetails = () => {
     setShowConfirmation(false);
@@ -228,6 +259,11 @@ const UploadMusicPage: React.FC = () => {
                       
                       {file.status === 'completed' && <CheckCircle className="w-6 h-6 text-green-500" />}
                       
+                      {file.status === 'error' && <div className="flex items-center space-x-2">
+                          <X className="w-6 h-6 text-red-500" />
+                          <span className="text-sm text-red-500">{file.error || 'Upload failed'}</span>
+                        </div>}
+                      
                       <motion.button onClick={() => removeFile(file.id)} className="p-1 text-gray-400 hover:text-red-500 transition-colors" whileHover={{
                   scale: 1.1
                 }} whileTap={{
@@ -252,7 +288,7 @@ const UploadMusicPage: React.FC = () => {
         duration: 0.6,
         delay: 0.2
       }}>
-            <TrackUploadConfirmation trackName={uploadedFiles[0]?.name || "Unknown Track"} moods={selectedMoods} customMood={customMood} onConfirm={handleConfirmUpload} onEdit={handleEditDetails} />
+            <TrackUploadConfirmation trackName={uploadedFiles[0]?.name || "Unknown Track"} moods={selectedMoods} customMood={customMood} file={uploadedFiles[0]?.file} onConfirm={handleConfirmUpload} onEdit={handleEditDetails} />
           </motion.div>}
 
         {/* Mood Tagger */}
