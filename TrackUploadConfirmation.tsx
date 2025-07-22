@@ -79,6 +79,7 @@ interface TrackUploadConfirmationProps {
   onEdit?: () => void;
   className?: string;
   isUploading?: boolean;
+  uploadError?: string;
 }
 export default function TrackUploadConfirmation({
   trackName,
@@ -87,7 +88,8 @@ export default function TrackUploadConfirmation({
   onConfirm,
   onEdit,
   className = "",
-  isUploading = false
+  isUploading = false,
+  uploadError
 }: TrackUploadConfirmationProps) {
   const [shareLevel, setShareLevel] = React.useState<'private' | 'inner-circle' | 'public'>('private');
   const shareOptions = [{
@@ -196,6 +198,23 @@ export default function TrackUploadConfirmation({
             })}
             </div>
           </div>
+
+          {/* Error Display */}
+          {uploadError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <div className="w-5 h-5 text-red-500">⚠️</div>
+                <div className="text-sm text-red-700">
+                  <strong>Upload Failed:</strong> {uploadError}
+                </div>
+              </div>
+              {uploadError.includes('logged in') && (
+                <div className="mt-2 text-xs text-red-600">
+                  Please sign in to your account and try uploading again.
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">

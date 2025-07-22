@@ -20,6 +20,7 @@ const UploadMusicPage: React.FC = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [customMood, setCustomMood] = useState<string>();
+  const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const features = [{
     icon: Sparkles,
@@ -132,6 +133,8 @@ const UploadMusicPage: React.FC = () => {
     try {
       console.log('Starting final upload with share level:', shareLevel);
       
+      setUploadError(undefined);
+      
       setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
         ...f,
         status: 'uploading',
@@ -166,17 +169,26 @@ const UploadMusicPage: React.FC = () => {
       
     } catch (error) {
       console.error('Upload failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
+      
+      setUploadError(errorMessage);
+      
       setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
         ...f,
         status: 'error',
         progress: 0,
-        error: error instanceof Error ? error.message : 'Upload failed'
+        error: errorMessage
       } : f));
       
+      if (errorMessage.includes('logged in') || errorMessage.includes('Authentication failed')) {
+        console.log('Authentication error detected - user needs to sign in');
+      }
     }
   };
   const handleEditDetails = () => {
     setShowConfirmation(false);
+    setShowMoodTagger(true);
+    setUploadError(undefined); // Clear any upload errors when editing
   };
   return <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -310,6 +322,7 @@ const UploadMusicPage: React.FC = () => {
               onConfirm={handleConfirmUpload} 
               onEdit={handleEditDetails}
               isUploading={uploadedFiles.some(f => f.status === 'uploading' && f.progress >= 95)}
+              uploadError={uploadError}
             />
           </motion.div>}
 
