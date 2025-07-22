@@ -5,6 +5,7 @@ import TagTheMoodFeature from './TagTheMoodFeature';
 import TrackUploadConfirmation from './TrackUploadConfirmation';
 import { uploadTrackToSupabase } from './lib/uploadUtils';
 import { supabase } from './lib/supabase';
+import { useAuth } from './lib/AuthContext';
 interface UploadedFile {
   id: string;
   name: string;
@@ -24,6 +25,7 @@ const UploadMusicPage: React.FC = () => {
   const [uploadError, setUploadError] = useState<string | undefined>(undefined);
   const [isCheckingAuth, setIsCheckingAuth] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
   const features = [{
     icon: Sparkles,
     title: "High-Fidelity, Zero Compromise  ",
@@ -144,20 +146,17 @@ const UploadMusicPage: React.FC = () => {
         throw new Error('Supabase client not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
       }
 
-      console.log('Checking authentication session...');
+      console.log('Using authenticated user from context...');
       setIsCheckingAuth(true);
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      console.log("💡 Supabase Session:", session);
-      console.log("⚠️ Supabase Session Error:", sessionError);
+      console.log("💡 Current user from context:", user);
       
-      if (!session || !session.user) {
-        alert("⚠️ No session found – user not logged in?");
+      if (!user) {
+        alert("⚠️ No user found – please sign in");
         throw new Error("You must be logged in to upload tracks.");
       }
       
-      
-      const userId = session.user.id;
+      const userId = user.id;
       console.log('Authenticated user ID:', userId);
       
       setUploadedFiles(prev => prev.map(f => f.id === uploadedFile.id ? {
