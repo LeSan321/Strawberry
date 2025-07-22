@@ -138,24 +138,24 @@ const UploadMusicPage: React.FC = () => {
       setUploadError(undefined);
       
       if (!supabase) {
+        console.log("💡 Supabase Session: Cannot check - client not configured");
+        console.log("⚠️ Supabase Session Error: Client not configured");
+        alert("⚠️ No session found – Supabase client not configured");
         throw new Error('Supabase client not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
       }
 
       console.log('Checking authentication session...');
       setIsCheckingAuth(true);
-      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      console.log('Session check result:', { session: session ? 'found' : 'null', user: session?.user ? 'found' : 'null', authError });
-      
-      if (authError) {
-        console.error('Auth error:', authError);
-        throw new Error(`Authentication failed: ${authError.message}`);
-      }
+      console.log("💡 Supabase Session:", session);
+      console.log("⚠️ Supabase Session Error:", sessionError);
       
       if (!session || !session.user) {
-        console.error('No authenticated session found. Session:', session);
-        throw new Error('You must be logged in to upload tracks. Please sign in and try again.');
+        alert("⚠️ No session found – user not logged in?");
+        throw new Error("You must be logged in to upload tracks.");
       }
+      
       
       const userId = session.user.id;
       console.log('Authenticated user ID:', userId);
