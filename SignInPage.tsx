@@ -2,27 +2,39 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Music, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import type { Page } from './StrawberryRiffApp';
+import { useAuth } from './lib/AuthContext';
+
 interface SignInPageProps {
-  onSignIn: (email: string, password: string) => void;
+  onSignInSuccess: () => void;
   onNavigate: (page: Page) => void;
 }
+
 const SignInPage: React.FC<SignInPageProps> = ({
-  onSignIn,
+  onSignInSuccess,
   onNavigate
 }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { signIn } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
+    
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      onSignIn(email, password);
+    setError(null);
+    
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+      setError(error.message);
       setIsLoading(false);
-    }, 1000);
+    } else {
+      onSignInSuccess();
+    }
   };
   return <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       <div className="max-w-md w-full">
@@ -60,6 +72,12 @@ const SignInPage: React.FC<SignInPageProps> = ({
             <h2 className="text-2xl font-bold text-gray-800 mb-2">Sign In</h2>
             <p className="text-gray-600">Continue your musical journey</p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>

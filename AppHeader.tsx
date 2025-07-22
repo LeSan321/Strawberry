@@ -2,24 +2,19 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Music, Upload, Users, ListMusic, User, LogOut } from 'lucide-react';
 import type { Page } from './StrawberryRiffApp';
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
+import { useAuth } from './lib/AuthContext';
+
 interface AppHeaderProps {
   currentPage: Page;
   onNavigate: (page: Page) => void;
-  user: User | null;
   onSignOut: () => void;
 }
 const AppHeader: React.FC<AppHeaderProps> = ({
   currentPage,
   onNavigate,
-  user,
   onSignOut
 }) => {
+  const { user } = useAuth();
   const navItems = [{
     id: 'home' as Page,
     label: 'Discover',
@@ -54,6 +49,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     label: 'Pricing',
     icon: Music
   });
+
+  const getUserDisplayName = () => {
+    return user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+  };
   return <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-pink-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -95,11 +94,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
-                      {user.name.charAt(0).toUpperCase()}
+                      {getUserDisplayName().charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                    {user.name}
+                    {getUserDisplayName()}
                   </span>
                 </div>
                 <motion.button onClick={onSignOut} className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100" whileHover={{
