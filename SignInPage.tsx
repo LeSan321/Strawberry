@@ -18,7 +18,11 @@ const SignInPage: React.FC<SignInPageProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signIn } = useAuth();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
+  const { signIn, resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,6 +39,26 @@ const SignInPage: React.FC<SignInPageProps> = ({
     } else {
       onSignInSuccess();
     }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!resetEmail) {
+      setResetMessage('Please enter your email address');
+      return;
+    }
+    
+    setResetLoading(true);
+    setResetMessage(null);
+    
+    const { error } = await resetPassword(resetEmail);
+    
+    if (error) {
+      setResetMessage(error.message);
+    } else {
+      setResetMessage('Password reset email sent! Check your inbox.');
+    }
+    
+    setResetLoading(false);
   };
   return <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       <div className="max-w-md w-full">
@@ -104,10 +128,63 @@ const SignInPage: React.FC<SignInPageProps> = ({
                 <input type="checkbox" className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500" />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
-              <button type="button" className="text-sm text-purple-600 hover:text-purple-700 font-medium">
+              <button 
+                type="button" 
+                onClick={() => setShowForgotPassword(!showForgotPassword)}
+                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+              >
                 Forgot password?
               </button>
             </div>
+
+            {showForgotPassword && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-3 p-4 bg-gray-50 rounded-lg"
+              >
+                <div>
+                  <label htmlFor="resetEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                    Enter your email to reset password
+                  </label>
+                  <input
+                    id="resetEmail"
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="your@email.com"
+                  />
+                </div>
+                {resetMessage && (
+                  <div className={`p-2 rounded text-sm ${resetMessage.includes('sent') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                    {resetMessage}
+                  </div>
+                )}
+                <div className="flex space-x-2">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={resetLoading || !resetEmail}
+                    className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {resetLoading ? 'Sending...' : 'Send Reset Email'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setResetEmail('');
+                      setResetMessage(null);
+                    }}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            )}
 
             <motion.button type="submit" disabled={isLoading || !email || !password} className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed" whileHover={{
             scale: isLoading ? 1 : 1.02
@@ -124,7 +201,10 @@ const SignInPage: React.FC<SignInPageProps> = ({
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <button className="text-purple-600 hover:text-purple-700 font-medium">
+              <button 
+                onClick={() => onNavigate('signup')}
+                className="text-purple-600 hover:text-purple-700 font-medium"
+              >
                 Create one
               </button>
             </p>

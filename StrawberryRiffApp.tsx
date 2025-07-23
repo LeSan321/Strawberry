@@ -6,13 +6,14 @@ import UploadMusicPage from './UploadMusicPage';
 import FriendsPage from './FriendsPage';
 import PlaylistsPage from './PlaylistsPage';
 import SignInPage from './SignInPage';
+import SignUpPage from './SignUpPage';
 import MyRiffsPage from './MyRiffsPage';
 import AboutContactPage from './AboutContactPage';
 import CreatorProfileFlow from './CreatorProfileFlow';
 import PricingPage from './PricingPage';
 import { AuthProvider, useAuth } from './lib/AuthContext';
 
-export type Page = 'home' | 'upload' | 'friends' | 'playlists' | 'signin' | 'myriffs' | 'about' | 'profile-setup' | 'pricing';
+export type Page = 'home' | 'upload' | 'friends' | 'playlists' | 'signin' | 'signup' | 'myriffs' | 'about' | 'profile-setup' | 'pricing';
 
 const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -44,6 +45,8 @@ const AppContent: React.FC = () => {
         return <PlaylistsPage />;
       case 'signin':
         return <SignInPage onSignInSuccess={handleSignInSuccess} onNavigate={setCurrentPage} />;
+      case 'signup':
+        return <SignUpPage onSignUpSuccess={() => setCurrentPage('signin')} onNavigate={setCurrentPage} />;
       case 'myriffs':
         return <MyRiffsPage />;
       case 'about':
