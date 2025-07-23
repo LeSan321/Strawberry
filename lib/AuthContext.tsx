@@ -7,6 +7,8 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
+  signUp: (email: string, password: string) => Promise<{ error?: any }>;
+  resetPassword: (email: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -67,6 +69,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
+  const signUp = async (email: string, password: string) => {
+    if (!supabase) {
+      return { error: { message: 'Supabase client not configured' } };
+    }
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    return { error };
+  };
+
+  const resetPassword = async (email: string) => {
+    if (!supabase) {
+      return { error: { message: 'Supabase client not configured' } };
+    }
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    return { error };
+  };
+
   const signOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
@@ -77,6 +100,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     loading,
     signIn,
+    signUp,
+    resetPassword,
     signOut,
   };
 
