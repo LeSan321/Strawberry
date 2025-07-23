@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const getInitialSession = async () => {
+      if (!supabase) return;
       const { data: { session }, error } = await supabase.auth.getSession();
       console.log('🔍 Initial Supabase session:', session);
       console.log('🔍 Initial session error:', error);
@@ -43,21 +45,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     getInitialSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription } } = supabase?.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state change:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       }
-    );
+    ) || { data: { subscription: { unsubscribe: () => {} } } };
 
     return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
     if (!supabase) {
-      return { error: { message: 'Supabase client not configured' } };
+      return { 
+        error: { 
+          message: 'Authentication service not configured. Please set up your Supabase environment variables (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY) to enable sign-in functionality.' 
+        } 
+      };
     }
     
     const { error } = await supabase.auth.signInWithPassword({
@@ -72,12 +78,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await supabase.auth.signOut();
   };
 
+  const resetPassword = async (email: string) => {
+    if (!supabase) {
+      return { error: { message: 'Authentication service not configured. Please set up your Supabase environment variables (VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY) to enable password reset functionality.' } };
+    }
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    return { error };
+  };
+
   const value = {
     session,
     user,
     loading,
     signIn,
     signOut,
+    resetPassword,
   };
 
   return (
