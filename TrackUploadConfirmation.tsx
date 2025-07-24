@@ -3,7 +3,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, Music, Share2, Eye, EyeOff, Users } from "lucide-react";
-import { cn } from "@/utils";
+import { cn } from "@/lib/utils";
 import MoodTagDisplay from "./MoodTagDisplay";
 
 // Simple fallback Button component
@@ -74,12 +74,9 @@ interface TrackUploadConfirmationProps {
   trackName: string;
   moods: string[];
   customMood?: string;
-  file?: File;
-  onConfirm?: (shareLevel: 'private' | 'inner-circle' | 'public') => void;
+  onConfirm?: () => void;
   onEdit?: () => void;
   className?: string;
-  isUploading?: boolean;
-  uploadError?: string;
 }
 export default function TrackUploadConfirmation({
   trackName,
@@ -87,9 +84,7 @@ export default function TrackUploadConfirmation({
   customMood,
   onConfirm,
   onEdit,
-  className = "",
-  isUploading = false,
-  uploadError
+  className = ""
 }: TrackUploadConfirmationProps) {
   const [shareLevel, setShareLevel] = React.useState<'private' | 'inner-circle' | 'public'>('private');
   const shareOptions = [{
@@ -199,50 +194,22 @@ export default function TrackUploadConfirmation({
             </div>
           </div>
 
-          {/* Error Display */}
-          {uploadError && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex items-center space-x-2">
-                <div className="w-5 h-5 text-red-500">⚠️</div>
-                <div className="text-sm text-red-700">
-                  <strong>Upload Failed:</strong> {uploadError}
-                </div>
-              </div>
-              {uploadError.includes('logged in') && (
-                <div className="mt-2 text-xs text-red-600">
-                  Please sign in to your account and try uploading again.
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
             <Button variant="outline" onClick={onEdit} className="flex-1">
               Edit Details
             </Button>
             
-            <Button 
-              onClick={() => {
-                console.log('Confirming upload with:', {
-                  trackName,
-                  moods,
-                  customMood,
-                  shareLevel
-                });
-                onConfirm?.(shareLevel);
-              }} 
-              disabled={isUploading}
-              className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isUploading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Sharing...</span>
-                </div>
-              ) : (
-                'Share Your Riff'
-              )}
+            <Button onClick={() => {
+            console.log('Confirming upload with:', {
+              trackName,
+              moods,
+              customMood,
+              shareLevel
+            });
+            onConfirm?.();
+          }} className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+              Share Your Riff
             </Button>
           </div>
 
