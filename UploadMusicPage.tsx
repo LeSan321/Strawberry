@@ -4,7 +4,9 @@ import * as React from "react";
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Music, FileAudio, CheckCircle, X, Sparkles, Zap, Users, EyeOff, Share2, Loader2, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
+import { useAuth } from "./lib/AuthContext";
+import { uploadTrackToSupabase } from "./lib/uploadUtils";
 
 // Simple fallback components
 const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -125,6 +127,7 @@ interface UploadFormData {
   visibility: VisibilityLevel;
 }
 const UploadMusicPage: React.FC = () => {
+  const { user, loading } = useAuth();
   const [dragActive, setDragActive] = useState(false);
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -236,13 +239,20 @@ const UploadMusicPage: React.FC = () => {
 
   // Upload & Share function
   const handleUploadAndShare = async () => {
+    if (!user) {
+      setErrorMessage('Please sign in to upload tracks');
+      return;
+    }
+    
     if (!formData.file) {
       setErrorMessage('Please select an audio file');
       return;
     }
+    
     setUploadState('uploading');
     setUploadProgress(0);
     setErrorMessage('');
+    
     try {
       // Simulate upload progress
       const progressInterval = setInterval(() => {
@@ -255,35 +265,17 @@ const UploadMusicPage: React.FC = () => {
         });
       }, 200);
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Here you would implement the actual Supabase upload logic:
-      // 1. Upload file to Supabase storage
-      // 2. Get the file URL
-      // 3. Create track record in database
-      // 4. Handle success/error states
-
-      /*
-      Example Supabase implementation:
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('uploads')
-        .upload(`tracks/${Date.now()}-${formData.file.name}`, formData.file);
-       if (uploadError) throw uploadError;
-       const trackData = {
-        user_id: session.user.id,
-        title: formData.title,
-        audio_url: uploadData.path,
-        tags: [...formData.selectedMoods, ...(formData.customMood ? [formData.customMood] : [])],
+      const uploadData = {
+        file: formData.file,
+        title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ""),
+        tags: formData.selectedMoods,
+        customMood: formData.customMood,
         visibility: formData.visibility,
-        created_at: new Date().toISOString()
+        userId: user.id
       };
-       const { error: insertError } = await supabase
-        .from('tracks')
-        .insert([trackData]);
-       if (insertError) throw insertError;
-      */
+
+      // Upload to Supabase
+      await uploadTrackToSupabase(uploadData);
 
       clearInterval(progressInterval);
       setUploadProgress(100);
@@ -303,6 +295,7 @@ const UploadMusicPage: React.FC = () => {
         setUploadProgress(0);
       }, 3000);
     } catch (error) {
+      console.error('Upload failed:', error);
       setUploadState('error');
       setErrorMessage(error instanceof Error ? error.message : 'Upload failed. Please try again.');
     }
@@ -319,6 +312,7 @@ const UploadMusicPage: React.FC = () => {
     setUploadState('idle');
     setUploadProgress(0);
     setErrorMessage('');
+    setShowCustomMoodInput(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -326,6 +320,34 @@ const UploadMusicPage: React.FC = () => {
   const onButtonClick = () => {
     fileInputRef.current?.click();
   };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-purple-600" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-purple-600" />
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Sign In Required</h2>
+          <p className="text-gray-600 mb-6">
+            Please sign in to your account to upload and share your music.
+          </p>
+          <Button onClick={() => window.location.reload()} className="bg-gradient-to-r from-pink-500 to-purple-600">
+            Go to Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return <div className="min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
@@ -374,7 +396,7 @@ const UploadMusicPage: React.FC = () => {
                     Track Uploaded & Shared Successfully!
                   </h3>
                   <p className="text-green-700 mb-4">
-                    Your riff "{formData.title}" is now live and ready to be discovered.
+                    Your riff &quot;{formData.title}&quot; is now live and ready to be discovered.
                   </p>
                   <div className="flex flex-wrap justify-center gap-2 mb-4">
                     {formData.selectedMoods.map(mood => {
@@ -706,13 +728,17 @@ const UploadMusicPage: React.FC = () => {
                 y: 0
               }} className="text-center">
                     <Button onClick={handleUploadAndShare} disabled={uploadState === 'uploading'} size="lg" className="w-full max-w-md mx-auto text-lg py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
-                      {uploadState === 'uploading' ? <>
+                      {uploadState === 'uploading' ? (
+                        <>
                           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                           Uploading & Sharing... {uploadProgress}%
-                        </> : <>
+                        </>
+                      ) : (
+                        <>
                           <Share2 className="w-5 h-5 mr-2" />
                           Upload & Share Your Riff
-                        </>}
+                        </>
+                      )}
                     </Button>
 
                     {uploadState === 'uploading' && <motion.div initial={{
