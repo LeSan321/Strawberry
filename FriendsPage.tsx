@@ -52,14 +52,16 @@ const FriendsPage: React.FC = () => {
     status: 'sent'
   }];
   const handleShareInvite = () => {
+    const inviteUrl = `${window.location.origin}/invite`;
+    
     if (navigator.share) {
       navigator.share({
         title: 'Join me on Strawberry Riff!',
         text: 'Check out this amazing music sharing platform',
-        url: 'https://strawberryriff.com/invite'
+        url: inviteUrl
       });
     } else {
-      navigator.clipboard.writeText('https://strawberryriff.com/invite');
+      navigator.clipboard.writeText(inviteUrl);
       // You could show a toast notification here
     }
   };
