@@ -3,9 +3,9 @@ import { motion } from 'framer-motion';
 import { Upload, Music, FileAudio, CheckCircle, X, Sparkles, Zap, Users } from 'lucide-react';
 import TagTheMoodFeature from './TagTheMoodFeature';
 import TrackUploadConfirmation from './TrackUploadConfirmation';
-import { uploadTrackToSupabase } from './lib/uploadUtils';
-import { supabase } from './lib/supabase';
-import { useAuth } from './lib/AuthContext';
+import { uploadTrackToSupabase } from '../lib/uploadUtils';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../lib/AuthContext';
 interface UploadedFile {
   id: string;
   name: string;
