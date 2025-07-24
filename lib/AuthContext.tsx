@@ -59,6 +59,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('🔄 Auth state change:', event, session);
           setSession(session);
           setUser(session?.user ?? null);
+          
+          if (event === 'SIGNED_IN' && session?.user) {
+            console.log('👤 DIAGNOSTIC: Ensuring user profile exists...');
+            await ensureUserProfile(session.user);
+          }
+          
           setLoading(false);
         }
       );
@@ -69,6 +75,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const ensureUserProfile = async (user: User) => {
+    if (!supabase) {
+      console.error('🚨 DIAGNOSTIC: Cannot ensure user profile - Supabase client not configured');
+      return;
+    }
+    
+    try {
+      console.log('🔍 DIAGNOSTIC: Checking if user profile exists for:', user.email);
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        console.log('➕ DIAGNOSTIC: Creating user profile for:', user.email);
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert({
+            id: user.id,
+            email: user.email || '',
+            name: user.user_metadata?.name || user.user_metadata?.full_name || null,
+            image: user.user_metadata?.avatar_url || null
+          });
+
+        if (insertError) {
+          console.error('❌ DIAGNOSTIC: Error creating user profile:', insertError);
+        } else {
+          console.log('✅ DIAGNOSTIC: User profile created successfully');
+        }
+      } else if (profile) {
+        console.log('✅ DIAGNOSTIC: User profile already exists');
+      } else if (error) {
+        console.error('❌ DIAGNOSTIC: Error checking user profile:', error);
+      }
+    } catch (error) {
+      console.error('❌ DIAGNOSTIC: Critical exception ensuring user profile:', error);
+    }
+  };
 
   const signIn = async (email: string, password: string) => {
     console.log('🔍 DIAGNOSTIC: Supabase URL being used:', import.meta.env.VITE_SUPABASE_URL);

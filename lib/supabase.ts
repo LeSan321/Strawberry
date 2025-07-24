@@ -10,7 +10,13 @@ console.log('🔍 DIAGNOSTIC: Processed supabaseUrl:', supabaseUrl);
 console.log('🔍 DIAGNOSTIC: Processed supabaseAnonKey:', supabaseAnonKey ? '[PRESENT]' : '[MISSING]');
 
 export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: localStorage,
+        persistSession: true,
+        autoRefreshToken: true,
+      }
+    })
   : null
 
 console.log('🔍 DIAGNOSTIC: Final supabase client instance:', supabase ? '[CREATED]' : '[NULL]');
