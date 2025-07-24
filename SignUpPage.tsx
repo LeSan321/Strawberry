@@ -47,11 +47,11 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
       setError(error.message);
       setIsLoading(false);
     } else {
-      setSuccess('Account created successfully! Please check your email to verify your account.');
+      setSuccess('Account created successfully! Please check your email to confirm your account before signing in.');
       setIsLoading(false);
       setTimeout(() => {
         onSignUpSuccess();
-      }, 2000);
+      }, 3000);
     }
   };
 

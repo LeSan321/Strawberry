@@ -118,9 +118,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     try {
+      const redirectUrl = typeof window !== 'undefined' ? window.location.origin : 'https://strawberryriff.com';
+      console.log('🔍 DIAGNOSTIC: SignUp - Email redirect URL:', redirectUrl);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: redirectUrl,
+        }
       });
       
       console.log('🔍 DIAGNOSTIC: SignUp response data:', data);
@@ -130,6 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('🚨 DIAGNOSTIC: Detailed signup error object:', error);
       } else {
         console.log('✅ DIAGNOSTIC: SignUp successful:', data);
+        console.log('🔍 DIAGNOSTIC: User confirmation required:', !data.session && data.user && !data.user.email_confirmed_at);
       }
       
       return { error };
