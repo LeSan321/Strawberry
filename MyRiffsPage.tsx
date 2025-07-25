@@ -3,8 +3,6 @@ import { motion } from 'framer-motion';
 import { Music, Edit, Trash2, Eye, EyeOff, Play, Heart, MoreHorizontal } from 'lucide-react';
 import { useAuth } from './lib/AuthContext';
 import { supabase, Track } from './lib/supabase';
-
-
 const MyRiffsPage: React.FC = () => {
   const { user } = useAuth();
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -108,21 +106,14 @@ const MyRiffsPage: React.FC = () => {
     setEditTitle('');
     setEditDescription('');
   };
-
-  const getUserDisplayName = () => {
-    return user?.user_metadata?.name || user?.email?.split('@')[0] || 'Music Creator';
-  };
-
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4">
+    return <div className="min-h-screen flex items-center justify-center py-12 px-4">
         <div className="text-center">
           <Music className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-gray-600 mb-2">Sign in to view your riffs</h2>
           <p className="text-gray-500">You need to be signed in to access your music collection</p>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   if (loading) {
@@ -168,12 +159,12 @@ const MyRiffsPage: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
             <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
               <span className="text-4xl font-bold">
-                {getUserDisplayName().charAt(0).toUpperCase()}
+                {user.name.charAt(0).toUpperCase()}
               </span>
             </div>
             
             <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">{getUserDisplayName()}</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">{user.name}</h1>
               <p className="text-xl text-white/90 mb-4">AI Music Creator</p>
               <p className="text-white/80 max-w-2xl">
                 Passionate about creating unique AI-generated music that blends technology with creativity. 

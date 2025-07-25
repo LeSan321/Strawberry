@@ -6,34 +6,36 @@ import UploadMusicPage from './UploadMusicPage';
 import FriendsPage from './FriendsPage';
 import PlaylistsPage from './PlaylistsPage';
 import SignInPage from './SignInPage';
-import SignUpPage from './SignUpPage';
 import MyRiffsPage from './MyRiffsPage';
 import AboutContactPage from './AboutContactPage';
 import CreatorProfileFlow from './CreatorProfileFlow';
 import PricingPage from './PricingPage';
-import { AuthProvider, useAuth } from './lib/AuthContext';
-
-export type Page = 'home' | 'upload' | 'friends' | 'playlists' | 'signin' | 'signup' | 'myriffs' | 'about' | 'profile-setup' | 'pricing';
-
-const AppContent: React.FC = () => {
+export type Page = 'home' | 'upload' | 'friends' | 'playlists' | 'signin' | 'myriffs' | 'about' | 'profile-setup' | 'pricing';
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+const StrawberryRiffApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
-  const { user, signOut } = useAuth();
-
-  const handleSignInSuccess = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const handleSignIn = (email: string, password: string) => {
+    // Mock authentication
+    setUser({
+      id: '1',
+      name: 'Music Creator',
+      email: email,
+      avatar: undefined
+    });
+    // Redirect new users to profile setup
     setCurrentPage('profile-setup');
   };
-
-  const handleSignOut = async () => {
-    await signOut();
+  const handleSignOut = () => {
+    setUser(null);
     setCurrentPage('home');
   };
   const renderPage = () => {
-    const protectedRoutes: Page[] = ['upload', 'friends', 'myriffs', 'profile-setup'];
-    if (protectedRoutes.includes(currentPage) && !user) {
-      setCurrentPage('signin');
-      return <SignInPage onSignInSuccess={handleSignInSuccess} onNavigate={setCurrentPage} />;
-    }
-
     switch (currentPage) {
       case 'home':
         return <HomePage />;
@@ -44,11 +46,9 @@ const AppContent: React.FC = () => {
       case 'playlists':
         return <PlaylistsPage />;
       case 'signin':
-        return <SignInPage onSignInSuccess={handleSignInSuccess} onNavigate={setCurrentPage} />;
-      case 'signup':
-        return <SignUpPage onSignUpSuccess={() => setCurrentPage('signin')} onNavigate={setCurrentPage} />;
+        return <SignInPage onSignIn={handleSignIn} onNavigate={setCurrentPage} />;
       case 'myriffs':
-        return <MyRiffsPage />;
+        return <MyRiffsPage user={user} />;
       case 'about':
         return <AboutContactPage />;
       case 'pricing':
@@ -62,37 +62,27 @@ const AppContent: React.FC = () => {
         return <HomePage />;
     }
   };
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <AppHeader 
-        currentPage={currentPage} 
-        onNavigate={setCurrentPage} 
-        onSignOut={handleSignOut} 
-      />
+  return <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      <AppHeader currentPage={currentPage} onNavigate={setCurrentPage} user={user} onSignOut={handleSignOut} />
       
       <main className="pt-20">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={currentPage}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
+          <motion.div key={currentPage} initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} exit={{
+          opacity: 0,
+          y: -20
+        }} transition={{
+          duration: 0.3
+        }}>
             {renderPage()}
           </motion.div>
         </AnimatePresence>
       </main>
-    </div>
-  );
+    </div>;
 };
-
-const StrawberryRiffApp: React.FC = () => {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  );
-};
-
 export default StrawberryRiffApp;
