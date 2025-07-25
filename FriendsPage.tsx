@@ -56,45 +56,6 @@ const HomePageConcertTicket: React.FC = () => {
     author: "rebel_frequencies",
     mood: "defiant"
   }];
-  const audiences = [{
-    title: "First-Timers",
-    description: "Never made music before? Perfect. Start with a feeling, let AI do the heavy lifting.",
-    gradient: "from-pink-400 to-rose-400"
-  }, {
-    title: "AI Explorers",
-    description: "Push the boundaries of what's possible when human creativity meets artificial intelligence.",
-    gradient: "from-purple-400 to-indigo-400"
-  }, {
-    title: "Seasoned Pros",
-    description: "Use AI as your creative partner. Sketch ideas faster, explore new territories.",
-    gradient: "from-blue-400 to-cyan-400"
-  }] as any[];
-  const steps = [{
-    number: "01",
-    title: "Upload any type of track",
-    description: "Demos, full songs, voice memos, AI generations - we welcome it all.",
-    gradient: "from-pink-400 to-purple-400"
-  }, {
-    number: "02",
-    title: "Tag the mood",
-    description: "Help others find your vibe. Melancholy? Euphoric? Rebellious? You choose.",
-    gradient: "from-purple-400 to-blue-400"
-  }, {
-    number: "03",
-    title: "Choose visibility",
-    description: "Keep it private, share with friends, or let the world discover your sound.",
-    gradient: "from-blue-400 to-green-400"
-  }] as any[];
-  const handleLike = (trackId: string) => {
-    setLikedTracks(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(trackId)) {
-        newSet.delete(trackId);
-      } else {
-        newSet.add(trackId);
-      }
-      return newSet;
-    });
   };
   return <div className="min-h-screen">
       {/* Hero Section */}
@@ -690,4 +651,5 @@ const HomePageConcertTicket: React.FC = () => {
       </section>
     </div>;
 };
-export default HomePageConcertTicket;
+
+export default FriendsPage;
