@@ -689,5 +689,4 @@ const HomePageConcertTicket: React.FC = () => {
         </div>
       </section>
     </div>;
-};
 export default HomePageConcertTicket;
