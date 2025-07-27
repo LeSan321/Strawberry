@@ -159,12 +159,12 @@ const MyRiffsPage: React.FC = () => {
           <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
             <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
               <span className="text-4xl font-bold">
-                {user.name.charAt(0).toUpperCase()}
+                {user?.user_metadata?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
               </span>
             </div>
             
             <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">{user.name}</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}</h1>
               <p className="text-xl text-white/90 mb-4">AI Music Creator</p>
               <p className="text-white/80 max-w-2xl">
                 Passionate about creating unique AI-generated music that blends technology with creativity. 

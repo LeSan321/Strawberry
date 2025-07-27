@@ -1,4 +1,9 @@
 import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.tsx';
+import { AuthProvider } from './lib/AuthContext';
+
 // Force light mode by removing dark class and preventing it from being added
 document.documentElement.classList.remove('dark');
 
@@ -18,9 +23,11 @@ document.addEventListener('DOMContentLoaded', forceLightMode);
 // Override system preference changes
 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 mediaQuery.addEventListener('change', forceLightMode);
-import { createRoot } from 'react-dom/client';
-import './index.css';
-import App from './App.tsx';
-createRoot(document.getElementById('root')!).render(<StrictMode>
-    <App />
-  </StrictMode>);
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  </StrictMode>
+);
