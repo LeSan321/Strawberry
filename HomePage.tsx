@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { useRouter } from 'next/router'; // this must come after the React import, not before router is used
+import { motion } from 'framer-motion';
+import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
 interface Track {
@@ -16,6 +21,10 @@ interface SonicSoulprint {
   mood: string;
 }
 const HomePage: React.FC = () => {
+import React, { useState } from 'react';
+import { useRouter } from 'next/router'; // this must come after the React import, not before router is used
+import { motion } from 'framer-motion';
+import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
   const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
   const [hoveredGraffiti, setHoveredGraffiti] = useState(false);
   const tracks: Track[] = [{
@@ -170,31 +179,30 @@ const HomePage: React.FC = () => {
           </motion.div>
         </motion.div>
 
-        <motion.div className="flex flex-col sm:flex-row gap-4 justify-center items-center" initial={{
-        opacity: 0,
-        y: 30
-      }} animate={{
-        opacity: 1,
-        y: 0
-      }} transition={{
-        duration: 0.8,
-        delay: 0.8
-      }}>
-          <motion.button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all" whileHover={{
-          scale: 1.05
-        }} whileTap={{
-          scale: 0.95
-        }}>
-            Start Creating
-          </motion.button>
-          <motion.button className="border-2 border-purple-300 text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-50 transition-all" whileHover={{
-          scale: 1.05
-        }} whileTap={{
-          scale: 0.95
-        }}>Join the Tribe</motion.button>
-        </motion.div>
-      </section>
+<motion.div
+  className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+  initial={{ opacity: 0, y: 30 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, delay: 0.8 }}
+>
+  <motion.button
+    className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all"
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={() => router.push('/upload')}
+  >
+    Start Creating
+  </motion.button>
 
+  <motion.button
+    className="border-2 border-purple-300 text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-50 transition-all"
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    onClick={() => router.push('/pricing')}
+  >
+    Join the Tribe
+  </motion.button>
+</motion.div>
       {/* Everything You Need to Share Music Section */}
       <section className="py-16 px-4 bg-white/50">
         <div className="max-w-6xl mx-auto text-center">
