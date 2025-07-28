@@ -30,7 +30,7 @@ const StrawberryRiffApp: React.FC = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage />;
+        return <HomePage onNavigate={setCurrentPage} />;
       case 'upload':
         return <UploadMusicPage />;
       case 'friends':
@@ -51,7 +51,7 @@ const StrawberryRiffApp: React.FC = () => {
           setCurrentPage('home');
         }} onCancel={() => setCurrentPage('home')} />;
       default:
-        return <HomePage />;
+        return <HomePage onNavigate={setCurrentPage} />;
     }
   };
   return <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
