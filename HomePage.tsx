@@ -18,11 +18,7 @@ interface SonicSoulprint {
   author: string;
   mood: string;
 }
-import React, { useState } from 'react';
-import { useRouter } from 'next/router'; // this must come after the React import, not before router is used
-import { motion } from 'framer-motion';
-import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
-  const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
+const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
   const [hoveredGraffiti, setHoveredGraffiti] = useState(false);
   const tracks: Track[] = [{
     id: '1',
@@ -623,4 +619,5 @@ import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Qu
     </div>;
 };
 export default HomePage;
+
 
