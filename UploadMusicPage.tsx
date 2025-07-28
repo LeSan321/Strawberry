@@ -266,12 +266,12 @@ const UploadMusicPage: React.FC = () => {
       }, 200);
 
       const uploadData = {
-        file: formData.file,
+        user_id: user.id,
         title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ""),
+        audio_url: `placeholder-${Date.now()}-${formData.file.name}`,
         tags: formData.selectedMoods,
-        customMood: formData.customMood,
-        visibility: formData.visibility,
-        userId: user.id
+        customMood: formData.customMood || undefined,
+        visibility: formData.visibility
       };
 
       // Upload to Supabase
