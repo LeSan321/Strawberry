@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { useRouter } from 'next/router'; // this must come after the React import, not before router is used
-import { motion } from 'framer-motion';
-import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
-import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
+const HomePage: React.FC = () => {
+  const router = useRouter(); // ✅ This should be the first line inside the function
 interface Track {
   id: string;
   title: string;
@@ -20,8 +18,6 @@ interface SonicSoulprint {
   author: string;
   mood: string;
 }
-const HomePage: React.FC = () => {
-  const router = useRouter();
 import React, { useState } from 'react';
 import { useRouter } from 'next/router'; // this must come after the React import, not before router is used
 import { motion } from 'framer-motion';
@@ -627,3 +623,4 @@ import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Qu
     </div>;
 };
 export default HomePage;
+
