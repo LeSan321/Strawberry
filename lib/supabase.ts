@@ -13,6 +13,8 @@ export const supabase = supabaseUrl && supabaseAnonKey
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null
 
+export default supabase
+
 console.log('🔍 DIAGNOSTIC: Final supabase client instance:', supabase ? '[CREATED]' : '[NULL]');
 
 export interface Track {
@@ -22,7 +24,7 @@ export interface Track {
   description?: string
   audio_url: string
   tags: string[]
-  customMood?: string
+  custom_mood?: string
   visibility: 'private' | 'inner-circle' | 'public'
   duration?: string
   likes: number

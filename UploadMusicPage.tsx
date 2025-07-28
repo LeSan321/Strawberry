@@ -7,6 +7,7 @@ import { Upload, Music, FileAudio, CheckCircle, X, Sparkles, Zap, Users, EyeOff,
 import { cn } from "@/utils";
 import { useAuth } from "./lib/AuthContext";
 import { uploadTrackToSupabase } from "./lib/uploadUtils";
+import { supabase } from "./lib/supabase";
 
 // Simple fallback components
 const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -265,17 +266,37 @@ const UploadMusicPage: React.FC = () => {
         });
       }, 200);
 
-      const uploadData = {
+      if (!supabase) {
+        throw new Error('Supabase client not configured');
+      }
+
+      const fileExt = formData.file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `tracks/${user.id}/${fileName}`;
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('audio-files')
+        .upload(filePath, formData.file);
+
+      if (uploadError) {
+        throw new Error(`Failed to upload audio file: ${uploadError.message}`);
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('audio-files')
+        .getPublicUrl(filePath);
+
+      const trackData = {
         user_id: user.id,
         title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ""),
-        audio_url: `placeholder-${Date.now()}-${formData.file.name}`,
+        audio_url: publicUrl,
         tags: formData.selectedMoods,
-        customMood: formData.customMood || undefined,
+        custom_mood: formData.customMood || undefined,
         visibility: formData.visibility
       };
 
-      // Upload to Supabase
-      await uploadTrackToSupabase(uploadData);
+      // Upload track metadata to Supabase
+      await uploadTrackToSupabase(trackData);
 
       clearInterval(progressInterval);
       setUploadProgress(100);

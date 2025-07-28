@@ -39,9 +39,13 @@ export async function uploadTrackToSupabase(trackData: Omit<Track, 'id' | 'creat
     throw new Error('Supabase client not configured');
   }
 
+  const cleanTrackData = Object.fromEntries(
+    Object.entries(trackData).filter(([_, value]) => value !== undefined)
+  );
+
   const { error } = await supabase
     .from('tracks')
-    .insert([trackData]);
+    .insert([cleanTrackData]);
 
   if (error) {
     throw new Error(`Failed to upload track: ${error.message}`);
