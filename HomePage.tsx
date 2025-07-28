@@ -21,6 +21,7 @@ interface SonicSoulprint {
   mood: string;
 }
 const HomePage: React.FC = () => {
+  const router = useRouter();
 import React, { useState } from 'react';
 import { useRouter } from 'next/router'; // this must come after the React import, not before router is used
 import { motion } from 'framer-motion';
