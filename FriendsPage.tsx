@@ -15,7 +15,7 @@ interface SonicSoulprint {
   author: string;
   mood: string;
 }
-const HomePageConcertTicket: React.FC = () => {
+const FriendsPage: React.FC = () => {
   const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
   const [hoveredTicket, setHoveredTicket] = useState(false);
   const tracks: Track[] = [{
@@ -96,7 +96,8 @@ const HomePageConcertTicket: React.FC = () => {
       return newSet;
     });
   };
-  return <div className="min-h-screen">
+  return (
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section className="text-center py-20 px-4 relative overflow-hidden">
         <motion.h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold mb-6 px-4" initial={{
@@ -688,5 +689,8 @@ const HomePageConcertTicket: React.FC = () => {
           </motion.button>
         </div>
       </section>
-    </div>;
-export default HomePageConcertTicket;
+    </div>
+  );
+};
+
+export default FriendsPage;
