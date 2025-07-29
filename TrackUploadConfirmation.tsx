@@ -73,7 +73,7 @@ Badge.displayName = "Badge";
 interface TrackUploadConfirmationProps {
   trackName: string;
   moods: string[];
-  customMood?: string;
+  custom_mood?: string;
   onConfirm?: () => void;
   onEdit?: () => void;
   className?: string;
@@ -81,7 +81,7 @@ interface TrackUploadConfirmationProps {
 export default function TrackUploadConfirmation({
   trackName,
   moods,
-  customMood,
+  custom_mood,
   onConfirm,
   onEdit,
   className = ""
@@ -149,9 +149,9 @@ export default function TrackUploadConfirmation({
             </div>
 
             {/* Mood Tags */}
-            {(moods.length > 0 || customMood) && <div className="space-y-2">
+            {(moods.length > 0 || custom_mood) && <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-700">Mood Tags:</p>
-                <MoodTagDisplay moods={moods} customMood={customMood} size="md" className="justify-center" />
+                <MoodTagDisplay moods={moods} custom_mood={custom_mood} size="md" className="justify-center" />
               </div>}
           </div>
 
@@ -204,7 +204,7 @@ export default function TrackUploadConfirmation({
             console.log('Confirming upload with:', {
               trackName,
               moods,
-              customMood,
+              custom_mood,
               shareLevel
             });
             onConfirm?.();

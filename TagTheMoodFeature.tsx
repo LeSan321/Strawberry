@@ -70,7 +70,7 @@ interface MoodTag {
   description: string;
 }
 interface TagTheMoodFeatureProps {
-  onMoodTagsChange?: (tags: string[], customMood?: string) => void;
+  onMoodTagsChange?: (tags: string[], custom_mood?: string) => void;
   maxTags?: number;
   className?: string;
 }
@@ -130,7 +130,7 @@ export default function TagTheMoodFeature({
 }: TagTheMoodFeatureProps) {
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
-  const [customMood, setCustomMood] = useState("");
+  const [custom_mood, setCustom_mood] = useState("");
   const [hoveredMood, setHoveredMood] = useState<string | null>(null);
   const handleMoodToggle = (moodId: string) => {
     let newSelectedMoods: string[];
@@ -142,16 +142,16 @@ export default function TagTheMoodFeature({
       return; // Max tags reached
     }
     setSelectedMoods(newSelectedMoods);
-    onMoodTagsChange?.(newSelectedMoods, customMood || undefined);
+    onMoodTagsChange?.(newSelectedMoods, custom_mood || undefined);
   };
   const handleCustomMoodSubmit = () => {
-    if (customMood.trim() && customMood.length <= 24) {
-      onMoodTagsChange?.(selectedMoods, customMood.trim());
+    if (custom_mood.trim() && custom_mood.length <= 24) {
+      onMoodTagsChange?.(selectedMoods, custom_mood.trim());
       setShowCustomInput(false);
     }
   };
   const handleCustomMoodCancel = () => {
-    setCustomMood("");
+    setCustom_mood("");
     setShowCustomInput(false);
     onMoodTagsChange?.(selectedMoods, undefined);
   };
@@ -289,14 +289,14 @@ export default function TagTheMoodFeature({
           height: 0
         }} className="space-y-3">
               <div className="flex gap-2">
-                <Input value={customMood} onChange={e => setCustomMood(e.target.value)} placeholder="Describe the mood..." maxLength={24} className="flex-1" onKeyDown={e => {
+                <Input value={custom_mood} onChange={e => setCustom_mood(e.target.value)} placeholder="Describe the mood..." maxLength={24} className="flex-1" onKeyDown={e => {
               if (e.key === 'Enter') {
                 handleCustomMoodSubmit();
               } else if (e.key === 'Escape') {
                 handleCustomMoodCancel();
               }
             }} autoFocus />
-                <Button onClick={handleCustomMoodSubmit} disabled={!customMood.trim()} size="sm" className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                <Button onClick={handleCustomMoodSubmit} disabled={!custom_mood.trim()} size="sm" className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
                   Add
                 </Button>
                 <Button onClick={handleCustomMoodCancel} variant="outline" size="sm">
@@ -304,12 +304,12 @@ export default function TagTheMoodFeature({
                 </Button>
               </div>
               <p className="text-xs text-gray-500 text-center">
-                {customMood.length}/24 characters
+                {custom_mood.length}/24 characters
               </p>
             </motion.div>}
 
           {/* Custom Mood Display */}
-          {customMood && !showCustomInput && <motion.div initial={{
+          {custom_mood && !showCustomInput && <motion.div initial={{
           opacity: 0,
           y: 10
         }} animate={{
@@ -318,7 +318,7 @@ export default function TagTheMoodFeature({
         }} className="mt-4 text-center">
               <p className="text-sm text-gray-600 mb-2">Your custom mood:</p>
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full">
-                <span className="text-sm font-medium text-gray-800">"{customMood}"</span>
+                <span className="text-sm font-medium text-gray-800">"{custom_mood}"</span>
                 <button onClick={handleCustomMoodCancel} className="text-gray-500 hover:text-red-500 transition-colors">
                   <X className="w-3 h-3" />
                 </button>
@@ -329,7 +329,7 @@ export default function TagTheMoodFeature({
         {/* Usage Counter */}
         <div className="text-center text-xs text-gray-500">
           {selectedMoods.length}/{maxTags} moods selected
-          {customMood && " • 1 custom mood added"}
+          {custom_mood && " • 1 custom mood added"}
         </div>
       </CardContent>
     </Card>;

@@ -123,7 +123,7 @@ interface UploadFormData {
   file: File | null;
   title: string;
   selectedMoods: string[];
-  customMood: string;
+  custom_mood: string;
   visibility: VisibilityLevel;
 }
 const UploadMusicPage: React.FC = () => {
@@ -138,7 +138,7 @@ const UploadMusicPage: React.FC = () => {
     file: null,
     title: '',
     selectedMoods: [],
-    customMood: '',
+    custom_mood: '',
     visibility: 'private'
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -232,7 +232,7 @@ const UploadMusicPage: React.FC = () => {
     }));
   };
   const handleCustomMoodSubmit = () => {
-    if (formData.customMood.trim() && formData.customMood.length <= 24) {
+    if (formData.custom_mood.trim() && formData.custom_mood.length <= 24) {
       setShowCustomMoodInput(false);
     }
   };
@@ -270,7 +270,7 @@ const UploadMusicPage: React.FC = () => {
         title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ""),
         audio_url: `placeholder-${Date.now()}-${formData.file.name}`,
         tags: formData.selectedMoods,
-        customMood: formData.customMood || undefined,
+        custom_mood: formData.custom_mood || undefined,
         visibility: formData.visibility
       };
 
@@ -287,7 +287,7 @@ const UploadMusicPage: React.FC = () => {
           file: null,
           title: '',
           selectedMoods: [],
-          customMood: '',
+          custom_mood: '',
           visibility: 'private'
         });
         setShowMoodSelector(false);
@@ -305,7 +305,7 @@ const UploadMusicPage: React.FC = () => {
       file: null,
       title: '',
       selectedMoods: [],
-      customMood: '',
+      custom_mood: '',
       visibility: 'private'
     });
     setShowMoodSelector(false);
@@ -405,8 +405,8 @@ const UploadMusicPage: React.FC = () => {
                           {moodData.name}
                         </Badge> : null;
                 })}
-                    {formData.customMood && <Badge className="bg-gradient-to-r from-pink-400 to-purple-500 text-white border-0">
-                        "{formData.customMood}"
+                    {formData.custom_mood && <Badge className="bg-gradient-to-r from-pink-400 to-purple-500 text-white border-0">
+                        "{formData.custom_mood}"
                       </Badge>}
                   </div>
                   <p className="text-sm text-green-600">

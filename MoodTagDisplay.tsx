@@ -4,7 +4,7 @@ import * as React from "react";
 import { motion } from "framer-motion";
 interface MoodTagDisplayProps {
   moods: string[];
-  customMood?: string;
+  custom_mood?: string;
   size?: "sm" | "md" | "lg";
   className?: string;
 }
@@ -25,11 +25,11 @@ const sizeClasses = {
 };
 export default function MoodTagDisplay({
   moods,
-  customMood,
+  custom_mood,
   size = "md",
   className = ""
 }: MoodTagDisplayProps) {
-  if (moods.length === 0 && !customMood) {
+  if (moods.length === 0 && !custom_mood) {
     return null;
   }
   return <div className={`flex flex-wrap gap-2 ${className}`}>
@@ -52,7 +52,7 @@ export default function MoodTagDisplay({
           </motion.span>;
     })}
       
-      {customMood && <motion.span initial={{
+      {custom_mood && <motion.span initial={{
       opacity: 0,
       scale: 0.8
     }} animate={{
@@ -66,7 +66,7 @@ export default function MoodTagDisplay({
             ${sizeClasses[size]} shadow-sm hover:shadow-md transition-shadow
             border-2 border-white/20
           `}>
-          "{customMood}"
+          "{custom_mood}"
         </motion.span>}
     </div>;
 }
