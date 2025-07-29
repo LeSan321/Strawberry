@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
+import type { Page } from './StrawberryRiffApp';
+
+interface HomePageProps {
+  onNavigate: (page: Page) => void;
+}
 interface Track {
   id: string;
   title: string;
@@ -15,7 +20,7 @@ interface SonicSoulprint {
   author: string;
   mood: string;
 }
-const HomePage: React.FC = () => {
+const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
   const [hoveredGraffiti, setHoveredGraffiti] = useState(false);
   const tracks: Track[] = [{
@@ -180,18 +185,22 @@ const HomePage: React.FC = () => {
         duration: 0.8,
         delay: 0.8
       }}>
-          <motion.button className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all" whileHover={{
-          scale: 1.05
-        }} whileTap={{
-          scale: 0.95
-        }}>
+          <motion.button 
+            onClick={() => onNavigate('upload')}
+            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all" 
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+          >
             Start Creating
           </motion.button>
-          <motion.button className="border-2 border-purple-300 text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-50 transition-all" whileHover={{
-          scale: 1.05
-        }} whileTap={{
-          scale: 0.95
-        }}>Join the Tribe</motion.button>
+          <motion.button 
+            onClick={() => onNavigate('signin')}
+            className="border-2 border-purple-300 text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-50 transition-all" 
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+          >
+            Join the Tribe
+          </motion.button>
         </motion.div>
       </section>
 
@@ -597,20 +606,15 @@ const HomePage: React.FC = () => {
         }}>
             Where authentic voices find their audience, and music finds its meaning.
           </motion.p>
-          <motion.button className="bg-white text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all" initial={{
-          opacity: 0,
-          y: 30
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          duration: 0.6,
-          delay: 0.4
-        }} whileHover={{
-          scale: 1.05
-        }} whileTap={{
-          scale: 0.95
-        }}>
+          <motion.button 
+            onClick={() => onNavigate('signin')}
+            className="bg-white text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all" 
+            initial={{ opacity: 0, y: 30 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.6, delay: 0.4 }} 
+            whileHover={{ scale: 1.05 }} 
+            whileTap={{ scale: 0.95 }}
+          >
             Claim Your Sonic Space
           </motion.button>
         </div>
