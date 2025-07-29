@@ -1,27 +1,29 @@
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
+import type { Page } from './StrawberryRiffApp';
 
-const HomePage: React.FC = () => {
-  const router = useRouter();
+interface HomePageProps {
+  onNavigate: (page: Page) => void;
+}
 
-  interface Track {
-    id: string;
-    title: string;
-    artist: string;
-    likes: number;
-    duration: string;
-    gradient: string;
-  }
+interface Track {
+  id: string;
+  title: string;
+  artist: string;
+  likes: number;
+  duration: string;
+  gradient: string;
+}
 
-  interface SonicSoulprint {
-    id: string;
-    quote: string;
-    author: string;
-    mood: string;
-  }
+interface SonicSoulprint {
+  id: string;
+  quote: string;
+  author: string;
+  mood: string;
+}
 
+const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
   const [hoveredGraffiti, setHoveredGraffiti] = useState(false);
 
@@ -124,15 +126,6 @@ const HomePage: React.FC = () => {
     });
   };
 
-  // Button click handlers for navigation
-  const handleStartCreating = () => {
-    router.push('/create'); // Navigate to create page
-  };
-
-  const handleJoinTribe = () => {
-    router.push('/join'); // Navigate to join/signup page
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
       {/* Hero Section */}
@@ -199,7 +192,7 @@ const HomePage: React.FC = () => {
             className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-pink-600 hover:to-purple-700 transition-all shadow-lg"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleStartCreating}
+            onClick={() => onNavigate('upload')}
           >
             Start Creating
           </motion.button>
@@ -208,7 +201,7 @@ const HomePage: React.FC = () => {
             className="border-2 border-purple-300 text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-purple-50 transition-all shadow-lg"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleJoinTribe}
+            onClick={() => onNavigate('signin')}
           >
             Join the Tribe
           </motion.button>
@@ -537,7 +530,6 @@ const HomePage: React.FC = () => {
           >
             Where authentic voices find their audience, and music finds its meaning.
           </motion.p>
-
           <motion.button 
             className="bg-white text-purple-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg"
             initial={{ opacity: 0, y: 30 }}
@@ -545,7 +537,7 @@ const HomePage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleJoinTribe}
+            onClick={() => onNavigate('signin')}
           >
             Claim Your Sonic Space
           </motion.button>

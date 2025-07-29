@@ -10,35 +10,27 @@ import MyRiffsPage from './MyRiffsPage';
 import AboutContactPage from './AboutContactPage';
 import CreatorProfileFlow from './CreatorProfileFlow';
 import PricingPage from './PricingPage';
+import { useAuth } from './lib/AuthContext';
+
 export type Page = 'home' | 'upload' | 'friends' | 'playlists' | 'signin' | 'myriffs' | 'about' | 'profile-setup' | 'pricing';
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
+
 const StrawberryRiffApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [user, setUser] = useState<User | null>(null);
-  const handleSignIn = (email: string, password: string) => {
-    // Mock authentication
-    setUser({
-      id: '1',
-      name: 'Music Creator',
-      email: email,
-      avatar: undefined
-    });
-    // Redirect new users to profile setup
+  const { user, signOut } = useAuth();
+
+  const handleSignIn = () => {
+    // Redirect new users to profile setup after successful sign in
     setCurrentPage('profile-setup');
   };
-  const handleSignOut = () => {
-    setUser(null);
+
+  const handleSignOut = async () => {
+    await signOut();
     setCurrentPage('home');
   };
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage />;
+        return <HomePage onNavigate={setCurrentPage} />;
       case 'upload':
         return <UploadMusicPage />;
       case 'friends':
@@ -48,7 +40,7 @@ const StrawberryRiffApp: React.FC = () => {
       case 'signin':
         return <SignInPage onSignIn={handleSignIn} onNavigate={setCurrentPage} />;
       case 'myriffs':
-        return <MyRiffsPage user={user} />;
+        return <MyRiffsPage />;
       case 'about':
         return <AboutContactPage />;
       case 'pricing':
@@ -59,11 +51,11 @@ const StrawberryRiffApp: React.FC = () => {
           setCurrentPage('home');
         }} onCancel={() => setCurrentPage('home')} />;
       default:
-        return <HomePage />;
+        return <HomePage onNavigate={setCurrentPage} />;
     }
   };
   return <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <AppHeader currentPage={currentPage} onNavigate={setCurrentPage} user={user} onSignOut={handleSignOut} />
+      <AppHeader currentPage={currentPage} onNavigate={setCurrentPage} onSignOut={handleSignOut} />
       
       <main className="pt-20">
         <AnimatePresence mode="wait">

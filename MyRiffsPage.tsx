@@ -1,86 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Music, Edit, Trash2, Eye, EyeOff, Play, Heart, MoreHorizontal } from 'lucide-react';
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-}
-interface Track {
-  id: string;
-  title: string;
-  description: string;
-  duration: string;
-  likes: number;
-  plays: number;
-  isPublic: boolean;
-  createdAt: string;
-  gradient: string;
-}
-interface MyRiffsPageProps {
-  user: User | null;
-}
-const MyRiffsPage: React.FC<MyRiffsPageProps> = ({
-  user
-}) => {
-  const [tracks, setTracks] = useState<Track[]>([{
-    id: '1',
-    title: 'Midnight Dreams',
-    description: 'A dreamy ambient track perfect for late night listening',
-    duration: '3:42',
-    likes: 24,
-    plays: 156,
-    isPublic: true,
-    createdAt: '2024-01-15',
-    gradient: 'from-purple-400 to-pink-400'
-  }, {
-    id: '2',
-    title: 'Electric Sunset',
-    description: 'Upbeat electronic vibes with a retro feel',
-    duration: '4:15',
-    likes: 18,
-    plays: 89,
-    isPublic: false,
-    createdAt: '2024-01-12',
-    gradient: 'from-orange-400 to-red-400'
-  }, {
-    id: '3',
-    title: 'Ocean Waves',
-    description: 'Calming sounds inspired by the sea',
-    duration: '5:28',
-    likes: 31,
-    plays: 203,
-    isPublic: true,
-    createdAt: '2024-01-08',
-    gradient: 'from-blue-400 to-teal-400'
-  }]);
+import { useAuth } from './lib/AuthContext';
+import { supabase, Track } from './lib/supabase';
+const MyRiffsPage: React.FC = () => {
+  const { user } = useAuth();
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingTrack, setEditingTrack] = useState<Track | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-  const handleTogglePrivacy = (trackId: string) => {
-    setTracks(prev => prev.map(track => track.id === trackId ? {
-      ...track,
-      isPublic: !track.isPublic
-    } : track));
+
+  useEffect(() => {
+    const fetchUserTracks = async () => {
+      if (!user || !supabase) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('tracks')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching tracks:', error);
+          setError('Failed to load your tracks');
+        } else {
+          setTracks(data || []);
+        }
+      } catch (err) {
+        console.error('Exception fetching tracks:', err);
+        setError('Failed to load your tracks');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserTracks();
+  }, [user]);
+  const handleTogglePrivacy = async (trackId: string) => {
+    if (!supabase) return;
+    
+    const track = tracks.find(t => t.id === trackId);
+    if (!track) return;
+    
+    const newVisibility = track.visibility === 'public' ? 'private' : 'public';
+    
+    const { error } = await supabase
+      .from('tracks')
+      .update({ visibility: newVisibility })
+      .eq('id', trackId);
+    
+    if (!error) {
+      setTracks(prev => prev.map(t => t.id === trackId ? { ...t, visibility: newVisibility } : t));
+    }
   };
-  const handleDeleteTrack = (trackId: string) => {
+  const handleDeleteTrack = async (trackId: string) => {
+    if (!supabase) return;
+    
     if (window.confirm('Are you sure you want to delete this track? This action cannot be undone.')) {
-      setTracks(prev => prev.filter(track => track.id !== trackId));
+      const { error } = await supabase
+        .from('tracks')
+        .delete()
+        .eq('id', trackId);
+      
+      if (!error) {
+        setTracks(prev => prev.filter(track => track.id !== trackId));
+      }
     }
   };
   const handleEditTrack = (track: Track) => {
     setEditingTrack(track);
     setEditTitle(track.title);
-    setEditDescription(track.description);
+    setEditDescription(track.description || '');
   };
-  const handleSaveEdit = () => {
-    if (editingTrack && editTitle.trim()) {
-      setTracks(prev => prev.map(track => track.id === editingTrack.id ? {
-        ...track,
+  const handleSaveEdit = async () => {
+    if (!editingTrack || !editTitle.trim() || !supabase) return;
+    
+    const { error } = await supabase
+      .from('tracks')
+      .update({ 
         title: editTitle,
-        description: editDescription
-      } : track));
+        description: editDescription 
+      })
+      .eq('id', editingTrack.id);
+    
+    if (!error) {
+      setTracks(prev => prev.map(track => 
+        track.id === editingTrack.id 
+          ? { ...track, title: editTitle, description: editDescription }
+          : track
+      ));
       setEditingTrack(null);
       setEditTitle('');
       setEditDescription('');
@@ -100,6 +115,35 @@ const MyRiffsPage: React.FC<MyRiffsPageProps> = ({
         </div>
       </div>;
   }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-12 px-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your tracks...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center py-12 px-4">
+        <div className="text-center">
+          <Music className="w-16 h-16 text-red-300 mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold text-red-600 mb-2">Error Loading Tracks</h2>
+          <p className="text-gray-500 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
   return <div className="min-h-screen py-8 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Artist Profile Section */}
@@ -115,12 +159,12 @@ const MyRiffsPage: React.FC<MyRiffsPageProps> = ({
           <div className="flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
             <div className="w-32 h-32 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
               <span className="text-4xl font-bold">
-                {user.name.charAt(0).toUpperCase()}
+                {user?.user_metadata?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
               </span>
             </div>
             
             <div className="text-center md:text-left">
-              <h1 className="text-4xl md:text-5xl font-bold mb-2">{user.name}</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}</h1>
               <p className="text-xl text-white/90 mb-4">AI Music Creator</p>
               <p className="text-white/80 max-w-2xl">
                 Passionate about creating unique AI-generated music that blends technology with creativity. 
@@ -159,7 +203,7 @@ const MyRiffsPage: React.FC<MyRiffsPageProps> = ({
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold text-gray-800">My Uploads</h2>
             <div className="text-sm text-gray-500">
-              {tracks.filter(t => t.isPublic).length} public • {tracks.filter(t => !t.isPublic).length} private
+              {tracks.filter(t => t.visibility === 'public').length} public • {tracks.filter(t => t.visibility !== 'public').length} private
             </div>
           </div>
 
@@ -180,7 +224,7 @@ const MyRiffsPage: React.FC<MyRiffsPageProps> = ({
           }}>
                   <div className="flex flex-col md:flex-row">
                     {/* Track Cover */}
-                    <div className={`w-full md:w-48 h-48 bg-gradient-to-br ${track.gradient} flex items-center justify-center relative group`}>
+                    <div className={`w-full md:w-48 h-48 bg-gradient-to-br ${track.gradient || 'from-purple-400 to-pink-400'} flex items-center justify-center relative group`}>
                       <Music className="w-12 h-12 text-white/60" />
                       <motion.button className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" whileHover={{
                   scale: 1.05
@@ -200,33 +244,33 @@ const MyRiffsPage: React.FC<MyRiffsPageProps> = ({
                           <div className="flex items-center space-x-3 mb-2">
                             <h3 className="text-xl font-semibold text-gray-800">{track.title}</h3>
                             <div className="flex items-center space-x-1">
-                              {track.isPublic ? <Eye className="w-4 h-4 text-green-500" /> : <EyeOff className="w-4 h-4 text-gray-400" />}
-                              <span className={`text-xs px-2 py-1 rounded-full ${track.isPublic ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                {track.isPublic ? 'Public' : 'Private'}
+                              {track.visibility === 'public' ? <Eye className="w-4 h-4 text-green-500" /> : <EyeOff className="w-4 h-4 text-gray-400" />}
+                              <span className={`text-xs px-2 py-1 rounded-full ${track.visibility === 'public' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                                {track.visibility === 'public' ? 'Public' : 'Private'}
                               </span>
                             </div>
                           </div>
-                          <p className="text-gray-600 mb-3">{track.description}</p>
+                          <p className="text-gray-600 mb-3">{track.description || 'No description'}</p>
                           <div className="flex items-center space-x-6 text-sm text-gray-500">
-                            <span>{track.duration}</span>
+                            <span>{track.duration || 'Unknown'}</span>
                             <span className="flex items-center space-x-1">
                               <Heart className="w-4 h-4" />
                               <span>{track.likes}</span>
                             </span>
                             <span>{track.plays} plays</span>
-                            <span>Created {new Date(track.createdAt).toLocaleDateString()}</span>
+                            <span>Created {new Date(track.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
 
                         {/* Action Buttons */}
                         <div className="flex items-center space-x-2 ml-4">
                           {/* Privacy Toggle */}
-                          <motion.button onClick={() => handleTogglePrivacy(track.id)} className={`p-2 rounded-lg transition-colors ${track.isPublic ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-50'}`} whileHover={{
+                          <motion.button onClick={() => handleTogglePrivacy(track.id)} className={`p-2 rounded-lg transition-colors ${track.visibility === 'public' ? 'text-green-600 hover:bg-green-50' : 'text-gray-400 hover:bg-gray-50'}`} whileHover={{
                       scale: 1.1
                     }} whileTap={{
                       scale: 0.9
-                    }} title={track.isPublic ? 'Make Private' : 'Make Public'}>
-                            {track.isPublic ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                    }} title={track.visibility === 'public' ? 'Make Private' : 'Make Public'}>
+                            {track.visibility === 'public' ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
                           </motion.button>
 
                           {/* Edit Button */}
