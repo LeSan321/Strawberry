@@ -607,9 +607,9 @@ const UploadMusicPage: React.FC = () => {
                       height: "auto"
                     }} className="space-y-3">
                             <div className="flex gap-2">
-                              <Input value={formData.customMood} onChange={e => setFormData(prev => ({
+                              <Input value={formData.custom_mood} onChange={e => setFormData(prev => ({
                           ...prev,
-                          customMood: e.target.value
+                          custom_mood: e.target.value
                         }))} placeholder="Describe the mood..." maxLength={24} className="flex-1" onKeyDown={e => {
                           if (e.key === 'Enter') {
                             handleCustomMoodSubmit();
@@ -617,29 +617,29 @@ const UploadMusicPage: React.FC = () => {
                             setShowCustomMoodInput(false);
                             setFormData(prev => ({
                               ...prev,
-                              customMood: ''
+                              custom_mood: ''
                             }));
                           }
                         }} autoFocus />
-                              <Button onClick={handleCustomMoodSubmit} disabled={!formData.customMood.trim()} size="sm">
+                              <Button onClick={handleCustomMoodSubmit} disabled={!formData.custom_mood.trim()} size="sm">
                                 Add
                               </Button>
                               <Button onClick={() => {
                           setShowCustomMoodInput(false);
                           setFormData(prev => ({
                             ...prev,
-                            customMood: ''
+                            custom_mood: ''
                           }));
                         }} variant="outline" size="sm">
                                 <X className="w-4 h-4" />
                               </Button>
                             </div>
                             <p className="text-xs text-gray-500 text-center">
-                              {formData.customMood.length}/24 characters
+                              {formData.custom_mood.length}/24 characters
                             </p>
                           </motion.div>}
 
-                        {formData.customMood && !showCustomMoodInput && <motion.div initial={{
+                        {formData.custom_mood && !showCustomMoodInput && <motion.div initial={{
                       opacity: 0,
                       y: 10
                     }} animate={{
@@ -647,10 +647,10 @@ const UploadMusicPage: React.FC = () => {
                       y: 0
                     }} className="mt-4 text-center">
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full">
-                              <span className="text-sm font-medium text-gray-800">"{formData.customMood}"</span>
+                              <span className="text-sm font-medium text-gray-800">"{formData.custom_mood}"</span>
                               <button onClick={() => setFormData(prev => ({
                           ...prev,
-                          customMood: ''
+                          custom_mood: ''
                         }))} className="text-gray-500 hover:text-red-500 transition-colors">
                                 <X className="w-3 h-3" />
                               </button>
