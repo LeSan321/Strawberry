@@ -34,16 +34,38 @@ export function removeDarkClasses(className: string): string {
  * @param trackData The track data to upload
  * @returns Promise that resolves when upload is complete
  */
-export async function uploadTrackToSupabase(trackData: Omit<Track, 'id' | 'created_at' | 'likes' | 'plays'>): Promise<void> {
+export async function uploadTrackToSupabase(trackData: Omit<Track, 'id' | 'created_at' | 'likes' | 'plays'> & { file: File }): Promise<void> {
   if (!supabase) {
     throw new Error('Supabase client not configured');
   }
 
-  const { error } = await supabase
-    .from('tracks')
-    .insert([trackData]);
+  // Upload file to storage bucket
+  const filePath = `uploads/${Date.now()}-${trackData.file.name}`;
+  const { error: uploadError } = await supabase.storage.from('uploads').upload(filePath, trackData.file);
 
-  if (error) {
-    throw new Error(`Failed to upload track: ${error.message}`);
+  if (uploadError) {
+    throw new Error(`File upload failed: ${uploadError.message}`);
+  }
+
+  // Get public URL
+  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(filePath);
+  const audioUrl = urlData?.publicUrl;
+
+  if (!audioUrl) {
+    throw new Error('Failed to retrieve public URL for uploaded file.');
+  }
+
+  // Insert track metadata
+  const { file, ...metadata } = trackData; // exclude `file` from DB insert
+  const { error: insertError } = await supabase.from('tracks').insert([
+    {
+      ...metadata,
+      audio_url: audioUrl,
+    },
+  ]);
+
+  if (insertError) {
+    throw new Error(`Failed to insert track metadata: ${insertError.message}`);
   }
 }
+
