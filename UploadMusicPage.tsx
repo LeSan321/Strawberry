@@ -270,7 +270,7 @@ const UploadMusicPage: React.FC = () => {
         title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ""),
         audio_url: `placeholder-${Date.now()}-${formData.file.name}`,
         tags: formData.selectedMoods,
-        customMood: formData.customMood || undefined,
+        custom_mood: formData.customMood || undefined,
         visibility: formData.visibility
       };
 
