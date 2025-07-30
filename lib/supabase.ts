@@ -22,7 +22,7 @@ export interface Track {
   description?: string
   audio_url: string
   tags: string[]
-  customMood?: string
+  custom_mood?: string
   visibility: 'private' | 'inner-circle' | 'public'
   duration?: string
   likes: number
