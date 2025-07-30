@@ -40,20 +40,25 @@ export async function uploadTrackToSupabase(trackData: Omit<Track, 'id' | 'creat
   }
 
   // Upload file to storage bucket
-  const filePath = `uploads/${Date.now()}-${trackData.file.name}`;
-  const { error: uploadError } = await supabase.storage.from('uploads').upload(filePath, trackData.file);
+  const filePath = `${Date.now()}-${trackData.file.name}`; // ✅ no extra 'uploads/' prefix
 
-  if (uploadError) {
-    throw new Error(`File upload failed: ${uploadError.message}`);
-  }
+const { error: uploadError } = await supabase
+  .storage
+  .from('uploads') // ✅ exact bucket name
+  .upload(filePath, trackData.file);
 
-  // Get public URL
-  const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(filePath);
-  const audioUrl = urlData?.publicUrl;
+if (uploadError) {
+  console.error('🚨 Upload to Supabase Storage failed:', uploadError); // ✅ log error
+  throw new Error(`File upload failed: ${uploadError.message}`);
+}
 
-  if (!audioUrl) {
-    throw new Error('Failed to retrieve public URL for uploaded file.');
-  }
+// Get public URL
+const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(filePath);
+const audioUrl = urlData?.publicUrl;
+
+if (!audioUrl) {
+  throw new Error('Failed to retrieve public URL for uploaded file.');
+}
 
   // Insert track metadata
   const { file, ...metadata } = trackData; // exclude `file` from DB insert
