@@ -272,6 +272,7 @@ const UploadMusicPage: React.FC = () => {
         tags: formData.selectedMoods,
         custom_mood: formData.customMood || undefined,
         visibility: formData.visibility
+        file: formData.file,
       };
 
       // Upload to Supabase
