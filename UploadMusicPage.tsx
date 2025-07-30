@@ -271,7 +271,7 @@ const UploadMusicPage: React.FC = () => {
         audio_url: `placeholder-${Date.now()}-${formData.file.name}`,
         tags: formData.selectedMoods,
         custom_mood: formData.customMood || undefined,
-        visibility: formData.visibility
+        visibility: formData.visibility,
         file: formData.file,
       };
 
