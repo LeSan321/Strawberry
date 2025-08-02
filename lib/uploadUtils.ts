@@ -35,7 +35,7 @@ export async function uploadTrackToSupabase(
     fileReader.readAsArrayBuffer(trackData.file.slice(0, 1000));
     
     // 1. Upload audio file
-    const filePath = `${Date.now()}-${trackData.file.name}`;
+   const filePath = `${Date.now()}-${trackData.file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     console.log("📂 UPLOAD ATTEMPT:");
     console.log("Bucket: 'uploads'");
     console.log("File path:", filePath);
