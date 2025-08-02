@@ -10,7 +10,8 @@ export async function uploadTrackToSupabase(
   setIsLoading?: (loading: boolean) => void
 ): Promise<boolean> {
   
-  // Enhanced Supabase client verification
+  console.log("🔥 UPLOAD FUNCTION CALLED - FORCED LOG");
+  console.log("🔥 TrackData received:", trackData);
   console.log("🔍 SUPABASE CLIENT DEBUG:");
   console.log("Supabase client exists:", !!supabase);
   console.log("Supabase URL:", supabase?.supabaseUrl);
