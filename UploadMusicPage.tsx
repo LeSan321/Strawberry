@@ -238,49 +238,57 @@ const UploadMusicPage: React.FC = () => {
   };
 
   // Upload & Share function
-  const handleUploadAndShare = async () => {
-    if (!user) {
-      setErrorMessage('Please sign in to upload tracks');
-      return;
-    }
-    
-    if (!formData.file) {
-      setErrorMessage('Please select an audio file');
-      return;
-    }
-    
-    setUploadState('uploading');
-    setUploadProgress(0);
-    setErrorMessage('');
-    
-    try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
+const handleUploadAndShare = async () => {
+  console.log("🚀 UPLOAD PROCESS STARTED"); // Add this for debugging
+  
+  if (!user) {
+    setErrorMessage('Please sign in to upload tracks');
+    return;
+  }
 
-      const uploadData = {
-        user_id: user.id,
-        title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ""),
-        tags: formData.selectedMoods,
-        custom_mood: formData.customMood || undefined,
-        visibility: formData.visibility,
-        file: formData.file,
-      };
+  if (!formData.file) {
+    setErrorMessage('Please select an audio file');
+    return;
+  }
+  
+  setUploadState('uploading');
+  setUploadProgress(0);
+  setErrorMessage('');
+  
+  try {
+    // Simulate upload progress
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + 10;
+      });
+    }, 200);
 
-      // Upload to Supabase
-      await uploadTrackToSupabase(uploadData);
+    // ✅ FIXED: Match the expected data structure
+    const uploadData = {
+      title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ''),
+      artist: user.user_metadata?.display_name || user.email || 'Unknown Artist', // ✅ Added
+      genre: formData.selectedMoods.join(', ') + (formData.customMood ? `, ${formData.customMood}` : ''), // ✅ Fixed
+      visibility: formData.visibility,
+      file: formData.file,
+    };
 
-      clearInterval(progressInterval);
+    console.log("📤 About to call uploadTrackToSupabase with:", uploadData); // Add this for debugging
+
+    // Upload to Supabase
+    const success = await uploadTrackToSupabase(uploadData);
+    
+    console.log("📤 Upload function returned:", success); // Add this for debugging
+    
+    clearInterval(progressInterval);
+    
+    if (success) {
       setUploadProgress(100);
       setUploadState('success');
-
+      
       // Reset form after success
       setTimeout(() => {
         setFormData({
@@ -288,18 +296,23 @@ const UploadMusicPage: React.FC = () => {
           title: '',
           selectedMoods: [],
           customMood: '',
-          visibility: 'private'
+          visibility: 'private',
         });
         setShowMoodSelector(false);
         setUploadState('idle');
         setUploadProgress(0);
       }, 3000);
-    } catch (error) {
-      console.error('Upload failed:', error);
+    } else {
       setUploadState('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Upload failed. Please try again.');
+      setErrorMessage('Upload failed. Please try again.');
     }
-  };
+    
+  } catch (error) {
+    console.error('Upload failed:', error);
+    setUploadState('error');
+    setErrorMessage(error instanceof Error ? error.message : 'Upload failed. Please try again.');
+  }
+};
   const resetForm = () => {
     setFormData({
       file: null,
