@@ -239,7 +239,7 @@ const UploadMusicPage: React.FC = () => {
 
   // Upload & Share function
 const handleUploadAndShare = async () => {
-  console.log("🚀 UPLOAD PROCESS STARTED"); // Add this for debugging
+  console.log("🚀 UPLOAD PROCESS STARTED"); 
   
   if (!user) {
     setErrorMessage('Please sign in to upload tracks');
@@ -267,21 +267,20 @@ const handleUploadAndShare = async () => {
       });
     }, 200);
 
-    // ✅ FIXED: Match the expected data structure
     const uploadData = {
       title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ''),
-      artist: user.user_metadata?.display_name || user.email || 'Unknown Artist', // ✅ Added
-      genre: formData.selectedMoods.join(', ') + (formData.customMood ? `, ${formData.customMood}` : ''), // ✅ Fixed
+      artist: user.user_metadata?.display_name || user.email || 'Unknown Artist', 
+      genre: formData.selectedMoods.join(', ') + (formData.customMood ? `, ${formData.customMood}` : ''), 
       visibility: formData.visibility,
       file: formData.file,
     };
 
-    console.log("📤 About to call uploadTrackToSupabase with:", uploadData); // Add this for debugging
+    console.log("📤 About to call uploadTrackToSupabase with:", uploadData); 
 
     // Upload to Supabase
     const success = await uploadTrackToSupabase(uploadData);
     
-    console.log("📤 Upload function returned:", success); // Add this for debugging
+    console.log("📤 Upload function returned:", success); 
     
     clearInterval(progressInterval);
     
