@@ -7,7 +7,7 @@ import { Upload, Music, FileAudio, CheckCircle, X, Sparkles, Zap, Users, EyeOff,
 import { cn } from "@/utils";
 import { useAuth } from "./lib/AuthContext";
 import { uploadTrackToSupabase } from "./lib/uploadUtils";
-
+console.log("🔍 Import check - uploadTrackToSupabase:", typeof uploadTrackToSupabase);
 // Simple fallback components
 const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "default" | "outline" | "ghost";
