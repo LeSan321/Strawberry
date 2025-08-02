@@ -1,76 +1,70 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { supabase, Track } from './supabase';
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { toast } from "react-hot-toast";
+import { supabase, Track } from "./supabase";
 
 /**
- * Ensures light mode is always used by removing the dark class from the document element.
- * This can be called from any component that needs to ensure light mode.
+ * Uploads a track to Supabase with full user feedback and error handling
+ * @param trackData - The track data including the audio file
  */
-export function ensureLightMode() {
-  if (typeof document !== 'undefined') {
-    // Always set dark mode to false
-    document.documentElement.classList.toggle('dark', false);
-  }
-}
-
-/**
- * Removes any dark mode classes from a className string
- * @param className The class string to process
- * @returns The class string with dark mode classes removed
- */
-export function removeDarkClasses(className: string): string {
-  return className
-    .split(' ')
-    .filter(cls => !cls.startsWith('dark:'))
-    .join(' ');
-}
-
-/**
- * Uploads a track to Supabase
- * @param trackData The track data to upload
- * @returns Promise that resolves when upload is complete
- */
-export async function uploadTrackToSupabase(trackData: Omit<Track, 'id' | 'created_at' | 'likes' | 'plays'> & { file: File }): Promise<void> {
+export async function uploadTrackToSupabase(
+  trackData: Omit<Track, 'id' | 'created_at' | 'likes' | 'plays'> & { file: File },
+  setIsLoading?: (loading: boolean) => void
+): Promise<boolean> {
   if (!supabase) {
-    throw new Error('Supabase client not configured');
+    toast.error("Upload failed: Supabase client not configured.");
+    return false;
   }
 
-  // Upload file to storage bucket
-  const filePath = `${Date.now()}-${trackData.file.name}`; // ✅ no extra 'uploads/' prefix
+  try {
+    if (setIsLoading) setIsLoading(true);
 
-const { error: uploadError } = await supabase
-  .storage
-  .from('uploads') // ✅ exact bucket name
-  .upload(filePath, trackData.file);
+    // 1. Upload audio file
+    const filePath = `${Date.now()}-${trackData.file.name}`;
+    const { data: uploadData, error: uploadError } = await supabase
+      .storage
+      .from('uploads')
+      .upload(filePath, trackData.file, { upsert: false });
 
-if (uploadError) {
-  console.error('🚨 Upload to Supabase Storage failed:', uploadError); // ✅ log error
-  throw new Error(`File upload failed: ${uploadError.message}`);
-}
+    if (uploadError) {
+      console.error("🚨 Supabase upload error:", uploadError);
+      toast.error(`Upload failed: ${uploadError.message}`);
+      if (setIsLoading) setIsLoading(false);
+      return false;
+    }
 
-// Get public URL
-const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(filePath);
-const audioUrl = urlData?.publicUrl;
+    // 2. Get public URL
+    const { data: urlData } = supabase.storage.from('uploads').getPublicUrl(filePath);
+    const audioUrl = urlData?.publicUrl;
 
-if (!audioUrl) {
-  throw new Error('Failed to retrieve public URL for uploaded file.');
-}
+    if (!audioUrl) {
+      toast.error("Failed to retrieve public URL.");
+      if (setIsLoading) setIsLoading(false);
+      return false;
+    }
 
-  // Insert track metadata
-  const { file, ...metadata } = trackData; // exclude `file` from DB insert
-  const { error: insertError } = await supabase.from('tracks').insert([
-    {
-      ...metadata,
-      audio_url: audioUrl,
-    },
-  ]);
+    // 3. Insert track metadata (excluding the file itself)
+    const { file, ...metadata } = trackData;
+    const { error: insertError } = await supabase.from('tracks').insert([
+      {
+        ...metadata,
+        audio_url: audioUrl,
+      }
+    ]);
 
-  if (insertError) {
-    throw new Error(`Failed to insert track metadata: ${insertError.message}`);
+    if (insertError) {
+      console.error("🚨 Supabase metadata insert error:", insertError);
+      toast.error(`Failed to save track info: ${insertError.message}`);
+      if (setIsLoading) setIsLoading(false);
+      return false;
+    }
+
+    toast.success("Track uploaded successfully! 🍓");
+    return true;
+  } catch (err) {
+    console.error("Unexpected upload error:", err);
+    toast.error("Something went wrong during upload.");
+    return false;
+  } finally {
+    if (setIsLoading) setIsLoading(false);
   }
 }
 
