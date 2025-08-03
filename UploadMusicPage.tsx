@@ -237,33 +237,25 @@ const UploadMusicPage: React.FC = () => {
     }
   };
 
-// Upload & Share function
+  // Upload & Share function
 const handleUploadAndShare = async () => {
   console.log("🚀 UPLOAD PROCESS STARTED"); 
-  console.log("🚀 User check:", !!user);
-  console.log("🚀 File check:", !!formData.file);
-  console.log("🚀 FormData:", formData);
   
   if (!user) {
-    console.log("❌ No user - exiting");
     setErrorMessage('Please sign in to upload tracks');
     return;
   }
 
   if (!formData.file) {
-    console.log("❌ No file - exiting");
     setErrorMessage('Please select an audio file');
     return;
   }
   
-  console.log("✅ Pre-checks passed, setting upload state");
   setUploadState('uploading');
   setUploadProgress(0);
   setErrorMessage('');
   
   try {
-    console.log("🔄 Starting try block");
-    
     // Simulate upload progress
     const progressInterval = setInterval(() => {
       setUploadProgress(prev => {
@@ -315,12 +307,11 @@ const handleUploadAndShare = async () => {
     }
     
   } catch (error) {
-    console.error("🚨 Error in handleUploadAndShare:", error);
+    console.error('Upload failed:', error);
     setUploadState('error');
     setErrorMessage(error instanceof Error ? error.message : 'Upload failed. Please try again.');
   }
 };
-
   const resetForm = () => {
     setFormData({
       file: null,
