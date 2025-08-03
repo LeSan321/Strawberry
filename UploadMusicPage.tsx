@@ -284,7 +284,6 @@ const handleUploadAndShare = async () => {
     };
 
     console.log("📤 About to call uploadTrackToSupabase with:", uploadData); 
-    console.log("📤 uploadTrackToSupabase function exists:", typeof uploadTrackToSupabase);
 
     // Upload to Supabase
     const success = await uploadTrackToSupabase(uploadData);
