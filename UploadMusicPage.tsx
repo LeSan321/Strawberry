@@ -7,7 +7,7 @@ import { Upload, Music, FileAudio, CheckCircle, X, Sparkles, Zap, Users, EyeOff,
 import { cn } from "@/utils";
 import { useAuth } from "./lib/AuthContext";
 import { uploadTrackToSupabase } from "./lib/uploadUtils";
-
+console.log("🔍 Import check - uploadTrackToSupabase:", typeof uploadTrackToSupabase);
 // Simple fallback components
 const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "default" | "outline" | "ghost";
@@ -238,49 +238,56 @@ const UploadMusicPage: React.FC = () => {
   };
 
   // Upload & Share function
-  const handleUploadAndShare = async () => {
-    if (!user) {
-      setErrorMessage('Please sign in to upload tracks');
-      return;
-    }
-    
-    if (!formData.file) {
-      setErrorMessage('Please select an audio file');
-      return;
-    }
-    
-    setUploadState('uploading');
-    setUploadProgress(0);
-    setErrorMessage('');
-    
-    try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
+const handleUploadAndShare = async () => {
+  console.log("🚀 UPLOAD PROCESS STARTED"); 
+  
+  if (!user) {
+    setErrorMessage('Please sign in to upload tracks');
+    return;
+  }
 
-      const uploadData = {
-        user_id: user.id,
-        title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ""),
-        tags: formData.selectedMoods,
-        custom_mood: formData.customMood || undefined,
-        visibility: formData.visibility,
-        file: formData.file,
-      };
+  if (!formData.file) {
+    setErrorMessage('Please select an audio file');
+    return;
+  }
+  
+  setUploadState('uploading');
+  setUploadProgress(0);
+  setErrorMessage('');
+  
+  try {
+    // Simulate upload progress
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + 10;
+      });
+    }, 200);
 
-      // Upload to Supabase
-      await uploadTrackToSupabase(uploadData);
+    const uploadData = {
+      title: formData.title || formData.file.name.replace(/\.[^/.]+$/, ''),
+      artist: user.user_metadata?.display_name || user.email || 'Unknown Artist', 
+      genre: formData.selectedMoods.join(', ') + (formData.customMood ? `, ${formData.customMood}` : ''), 
+      visibility: formData.visibility,
+      file: formData.file,
+    };
 
-      clearInterval(progressInterval);
+    console.log("📤 About to call uploadTrackToSupabase with:", uploadData); 
+
+    // Upload to Supabase
+    const success = await uploadTrackToSupabase(uploadData);
+    
+    console.log("📤 Upload function returned:", success); 
+    
+    clearInterval(progressInterval);
+    
+    if (success) {
       setUploadProgress(100);
       setUploadState('success');
-
+      
       // Reset form after success
       setTimeout(() => {
         setFormData({
@@ -288,18 +295,23 @@ const UploadMusicPage: React.FC = () => {
           title: '',
           selectedMoods: [],
           customMood: '',
-          visibility: 'private'
+          visibility: 'private',
         });
         setShowMoodSelector(false);
         setUploadState('idle');
         setUploadProgress(0);
       }, 3000);
-    } catch (error) {
-      console.error('Upload failed:', error);
+    } else {
       setUploadState('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Upload failed. Please try again.');
+      setErrorMessage('Upload failed. Please try again.');
     }
-  };
+    
+  } catch (error) {
+    console.error('Upload failed:', error);
+    setUploadState('error');
+    setErrorMessage(error instanceof Error ? error.message : 'Upload failed. Please try again.');
+  }
+};
   const resetForm = () => {
     setFormData({
       file: null,
@@ -798,51 +810,4 @@ const UploadMusicPage: React.FC = () => {
 };
 export default UploadMusicPage;
 
-Neo Patch 
-// A complete, correct upload function
-const handleUpload = async () => {
-  // 1. Validate that a file has been selected
-  if (!formData.file) {
-    setErrorMessage('No file selected.');
-    return;
-  }
-
-  // Optional: Set a loading state for the UI
-  setUploadState('uploading'); 
-  setErrorMessage('');
-
-  try {
-    // 2. Define the file path in the bucket. 
-    // This is a good practice to avoid name collisions.
-    const filePath = `audio/${Date.now()}_${formData.file.name}`;
-
-    // 3. The CORE of the fix: Upload the file.
-    // Notice we pass `formData.file` directly. This is the `File` object.
-    const { data, error } = await supabase.storage
-      .from('your-bucket-name') // <-- IMPORTANT: Replace with your bucket name
-      .upload(filePath, formData.file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    // 4. Handle potential errors from Supabase
-    if (error) {
-      // Re-throw the error to be caught by the catch block
-      throw error; 
-    }
-
-    // 5. Handle success
-    console.log('Upload successful:', data);
-    setUploadState('success');
-    // You might want to get the public URL and save it to your database here
-    // const { data: { publicUrl } } = supabase.storage.from('your-bucket-name').getPublicUrl(filePath);
-    // ... save publicUrl to your 'tracks' table ...
-
-  } catch (error) {
-    // 6. Handle errors from the try block (including the re-thrown Supabase error)
-    console.error('Error uploading file:', error);
-    setErrorMessage(error.message || 'An unexpected error occurred.');
-    setUploadState('error');
-  }
-};
 
