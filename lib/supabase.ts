@@ -19,9 +19,11 @@ export interface Track {
   id: string
   user_id: string
   title: string
+  artist?: string
+  genre?: string
   description?: string
   audio_url: string
-  tags: string[]
+  tags?: string[]
   custom_mood?: string
   visibility: 'private' | 'inner-circle' | 'public'
   duration?: string
