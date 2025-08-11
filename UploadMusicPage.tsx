@@ -272,6 +272,7 @@ const handleUploadAndShare = async () => {
       artist: user.user_metadata?.display_name || user.email || 'Unknown Artist', 
       genre: formData.selectedMoods.join(', ') + (formData.customMood ? `, ${formData.customMood}` : ''), 
       visibility: formData.visibility,
+      user_id: user.id,
       file: formData.file,
     };
 
