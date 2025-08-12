@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Heart, Music, Users, Upload, BarChart3, Headphones, ListMusic, Quote, Sparkles } from 'lucide-react';
 import type { Page } from './StrawberryRiffApp';
+import AudioPlayer from './components/AudioPlayer';
 
 interface HomePageProps {
   onNavigate: (page: Page) => void;
@@ -14,6 +15,7 @@ interface Track {
   likes: number;
   duration: string;
   gradient: string;
+  audio_url?: string;
 }
 
 interface SonicSoulprint {
@@ -34,7 +36,8 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       artist: 'AI Composer',
       likes: 234,
       duration: '3:42',
-      gradient: 'from-purple-400 to-pink-400'
+      gradient: 'from-purple-400 to-pink-400',
+      audio_url: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3'
     },
     {
       id: '2',
@@ -42,7 +45,8 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       artist: 'Digital Harmony',
       likes: 189,
       duration: '4:15',
-      gradient: 'from-blue-400 to-purple-400'
+      gradient: 'from-blue-400 to-purple-400',
+      audio_url: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3'
     },
     {
       id: '3',
@@ -50,7 +54,8 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       artist: 'Synthetic Soul',
       likes: 156,
       duration: '3:28',
-      gradient: 'from-green-400 to-blue-400'
+      gradient: 'from-green-400 to-blue-400',
+      audio_url: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3'
     }
   ];
 
@@ -449,7 +454,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <p className="text-gray-600 text-lg">Fresh drops from the community—updated by humans, not math.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tracks.map((track, index) => (
               <motion.div 
                 key={track.id}
@@ -459,15 +464,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 whileHover={{ y: -5 }}
               >
-                <div className={`h-48 bg-gradient-to-br ${track.gradient} flex items-center justify-center relative group`}>
-                  <motion.button 
-                    className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                  >
-                    <Play className="w-8 h-8 ml-1" />
-                  </motion.button>
-
+                <div className={`h-32 bg-gradient-to-br ${track.gradient} flex items-center justify-center relative group`}>
                   <div className="absolute top-4 right-4">
                     <motion.button 
                       onClick={() => handleLike(track.id)}
@@ -484,9 +481,21 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">{track.title}</h3>
-                  <p className="text-gray-600 mb-4">{track.artist}</p>
+                <div className="p-4">
+                  <div className="mb-4">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-1">{track.title}</h3>
+                    <p className="text-gray-600 text-sm">{track.artist}</p>
+                  </div>
+                  
+                  {track.audio_url && (
+                    <AudioPlayer
+                      src={track.audio_url}
+                      title={track.title}
+                      artist={track.artist}
+                      className="mb-4"
+                    />
+                  )}
+                  
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <span className="flex items-center space-x-1">
                       <Heart className="w-4 h-4" />
