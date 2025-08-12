@@ -37,7 +37,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       likes: 234,
       duration: '3:42',
       gradient: 'from-purple-400 to-pink-400',
-      audio_url: 'https://www2.cs.uic.edu/~i101/SoundFiles/BabyElephantWalk60.wav'
+      audio_url: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3'
     },
     {
       id: '2',
@@ -46,7 +46,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       likes: 189,
       duration: '4:15',
       gradient: 'from-blue-400 to-purple-400',
-      audio_url: 'https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav'
+      audio_url: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3'
     },
     {
       id: '3',
@@ -55,7 +55,7 @@ const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       likes: 156,
       duration: '3:28',
       gradient: 'from-green-400 to-blue-400',
-      audio_url: 'https://www2.cs.uic.edu/~i101/SoundFiles/ImperialMarch60.wav'
+      audio_url: 'https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3'
     }
   ];
 
