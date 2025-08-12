@@ -49,7 +49,7 @@ const CreatorProfileFlow: React.FC<CreatorProfileFlowProps> = ({
   const [uploadedAvatar, setUploadedAvatar] = useState<File | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const feelings = [{
     id: 'present',
@@ -212,9 +212,9 @@ const CreatorProfileFlow: React.FC<CreatorProfileFlowProps> = ({
     }
   };
   const playVoiceTag = () => {
-    if (profile.voiceTag && !isPlaying) {
+    if (profile.voiceTag && !isPlaying && audioRef.current) {
       const audioUrl = URL.createObjectURL(profile.voiceTag);
-      audioRef.current = new Audio(audioUrl);
+      audioRef.current.src = audioUrl;
       audioRef.current.play();
       setIsPlaying(true);
       audioRef.current.onended = () => {
@@ -231,7 +231,7 @@ const CreatorProfileFlow: React.FC<CreatorProfileFlowProps> = ({
     setIsPlaying(false);
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current = null;
+      audioRef.current.src = '';
     }
   };
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -447,6 +447,13 @@ const CreatorProfileFlow: React.FC<CreatorProfileFlowProps> = ({
             </p>
             
             <div className="bg-gray-50 rounded-2xl p-8 mb-8">
+              {/* Hidden HTML5 audio element for voice tag playback */}
+              <audio
+                ref={audioRef}
+                style={{ display: 'none' }}
+                onEnded={() => setIsPlaying(false)}
+              />
+              
               {!profile.voiceTag ? <div className="space-y-6">
                   <div className="w-24 h-24 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full flex items-center justify-center mx-auto">
                     {isRecording ? <motion.div animate={{
@@ -491,7 +498,7 @@ const CreatorProfileFlow: React.FC<CreatorProfileFlowProps> = ({
                   scale: 0.95
                 }}>
                       {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-                      <span>Preview</span>
+                      <span>{isPlaying ? 'Playing...' : 'Preview'}</span>
                     </motion.button>
                     
                     <motion.button onClick={deleteVoiceTag} className="flex items-center space-x-2 bg-red-500 text-white px-6 py-3 rounded-full hover:bg-red-600 transition-all" whileHover={{
