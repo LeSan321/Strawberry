@@ -14,6 +14,11 @@ export async function uploadTrackToSupabase(
   
   if (!supabase) {
     console.error("Upload failed: Supabase client not configured.");
+    console.error("Required infrastructure:");
+    console.error("1. Valid VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env");
+    console.error("2. Edge Function 'create-upload-url' deployed");
+    console.error("3. Storage bucket 'audio-uploads' created");
+    console.error("4. Storage policies configured");
     return false;
   }
 
@@ -51,6 +56,16 @@ export async function uploadTrackToSupabase(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
       console.error("❌ Failed to get signed URL:", errorData);
+      
+      if (response.status === 404) {
+        console.error("❌ Edge Function not found. Please deploy the create-upload-url function.");
+        return false;
+      }
+      if (response.status === 500 && errorData.error?.includes('bucket')) {
+        console.error("❌ Storage bucket 'audio-uploads' not found. Please create it in Supabase dashboard.");
+        return false;
+      }
+      
       return false;
     }
 
@@ -72,6 +87,18 @@ export async function uploadTrackToSupabase(
     }
 
     console.log("✅ FILE UPLOADED SUCCESSFULLY!");
+
+    console.log("🔍 TESTING PUBLIC URL ACCESSIBILITY...");
+    try {
+      const testResponse = await fetch(fileUrl, { method: 'HEAD' });
+      if (!testResponse.ok) {
+        console.warn("⚠️ Public URL may not be accessible:", testResponse.status);
+      } else {
+        console.log("✅ Public URL is accessible");
+      }
+    } catch (error) {
+      console.warn("⚠️ Could not test public URL accessibility:", error);
+    }
 
     console.log("💾 INSERTING METADATA...");
     const { file, ...metadata } = trackData;

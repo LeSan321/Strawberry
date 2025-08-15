@@ -273,6 +273,7 @@ const handleUploadAndShare = async () => {
       genre: formData.selectedMoods.join(', ') + (formData.customMood ? `, ${formData.customMood}` : ''), 
       visibility: formData.visibility,
       user_id: user.id,
+      audio_url: '',
       file: formData.file,
     };
 
@@ -304,13 +305,24 @@ const handleUploadAndShare = async () => {
       }, 3000);
     } else {
       setUploadState('error');
-      setErrorMessage('Upload failed. Please try again.');
+      setErrorMessage('Upload failed. Please check console for details or contact support.');
     }
     
   } catch (error) {
     console.error('Upload failed:', error);
     setUploadState('error');
-    setErrorMessage(error instanceof Error ? error.message : 'Upload failed. Please try again.');
+    
+    if (error instanceof Error) {
+      if (error.message.includes('Edge Function not found')) {
+        setErrorMessage('Upload service not configured. Please contact support.');
+      } else if (error.message.includes('Storage bucket')) {
+        setErrorMessage('Storage not configured. Please contact support.');
+      } else {
+        setErrorMessage(error.message);
+      }
+    } else {
+      setErrorMessage('Upload failed. Please check console for details or contact support.');
+    }
   }
 };
   const resetForm = () => {
