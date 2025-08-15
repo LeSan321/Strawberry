@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Music, Edit, Trash2, Eye, EyeOff, Play, Heart, MoreHorizontal } from 'lucide-react';
 import { useAuth } from './lib/AuthContext';
 import { supabase, Track } from './lib/supabase';
+import AudioPlayer from './components/AudioPlayer';
 const MyRiffsPage: React.FC = () => {
   const { user } = useAuth();
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -251,6 +252,18 @@ const MyRiffsPage: React.FC = () => {
                             </div>
                           </div>
                           <p className="text-gray-600 mb-3">{track.description || 'No description'}</p>
+                          
+                          {track.audio_url && (
+                            <div className="mb-4">
+                              <AudioPlayer
+                                src={track.audio_url}
+                                title={track.title}
+                                artist={track.artist || 'Unknown Artist'}
+                                className="w-full"
+                              />
+                            </div>
+                          )}
+                          
                           <div className="flex items-center space-x-6 text-sm text-gray-500">
                             <span>{track.duration || 'Unknown'}</span>
                             <span className="flex items-center space-x-1">
