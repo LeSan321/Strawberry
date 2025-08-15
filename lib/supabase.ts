@@ -9,10 +9,16 @@ console.log('🔍 DIAGNOSTIC: VITE_SUPABASE_ANON_KEY from env:', import.meta.env
 console.log('🔍 DIAGNOSTIC: Processed supabaseUrl:', supabaseUrl);
 console.log('🔍 DIAGNOSTIC: Processed supabaseAnonKey:', supabaseAnonKey ? '[PRESENT]' : '[MISSING]');
 
-export const supabase = supabaseUrl && supabaseAnonKey 
+const isValidConfig = supabaseUrl && supabaseAnonKey && 
+  !supabaseUrl.includes('your-supabase-project-url') && 
+  !supabaseAnonKey.includes('your-supabase-anon-key') &&
+  supabaseUrl.startsWith('http');
+
+export const supabase = isValidConfig 
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null
 
+console.log('🔍 DIAGNOSTIC: Config validation:', isValidConfig ? '[VALID]' : '[INVALID - using placeholder values]');
 console.log('🔍 DIAGNOSTIC: Final supabase client instance:', supabase ? '[CREATED]' : '[NULL]');
 
 export interface Track {
