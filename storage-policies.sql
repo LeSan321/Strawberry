@@ -28,6 +28,11 @@ FOR DELETE USING (
     AND (auth.uid()::text = (storage.foldername(name))[1])
 );
 
+CREATE POLICY "Allow public read access for audio files" ON storage.objects
+FOR SELECT USING (
+    bucket_id = 'audio-uploads'
+);
+
 SELECT schemaname, tablename, policyname, permissive, roles, cmd, qual 
 FROM pg_policies 
 WHERE tablename = 'objects' AND schemaname = 'storage';
