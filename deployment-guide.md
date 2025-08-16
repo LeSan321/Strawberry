@@ -207,6 +207,26 @@ FOR DELETE USING (
 );
 ```
 
+**CRITICAL: Create Public Read Policy for Audio Playback:**
+```sql
+CREATE POLICY "Allow public read access for audio files" ON storage.objects
+FOR SELECT USING (
+    bucket_id = 'audio-uploads'
+);
+```
+
+**Important Note:** The public read access policy is essential for audio playback functionality. Without this policy, uploaded audio files will return 400 errors when the AudioPlayer component attempts to stream them via public URLs. This policy allows unauthenticated access to files in the `audio-uploads` bucket, enabling the AudioPlayer to function correctly.
+
+**CRITICAL: Create Public Read Policy for Audio Playback:**
+```sql
+CREATE POLICY "Allow public read access for audio files" ON storage.objects
+FOR SELECT USING (
+    bucket_id = 'audio-uploads'
+);
+```
+
+**Important Note:** The public read access policy is essential for audio playback functionality. Without this policy, uploaded audio files will return 400 errors when the AudioPlayer component attempts to stream them via public URLs. This policy allows unauthenticated access to files in the `audio-uploads` bucket, enabling the AudioPlayer to function correctly.
+
 ### 3. Verify Storage Setup
 
 Test storage access:
