@@ -36,10 +36,16 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, title, artist, className
       setCurrentTime(0);
     };
 
-    const handleError = () => {
-      setError('Failed to load audio');
-      setIsLoading(false);
-    };
+    const handleError = (e) => {
+  console.error('🎵 AUDIO ERROR DETAILS:', e);
+  console.error('🎵 Audio element:', e.target);
+  console.error('🎵 Error code:', e.target.error?.code);
+  console.error('🎵 Error message:', e.target.error?.message);
+  console.error('🎵 Current src:', e.target.src);
+  
+  setError('Failed to load audio');
+  setIsLoading(false);
+};
 
     const handleCanPlay = () => {
       setIsLoading(false);
