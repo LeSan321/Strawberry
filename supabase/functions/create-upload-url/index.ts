@@ -26,6 +26,7 @@ interface UploadRequest {
   fileName: string
   fileSize: number
   contentType: string
+  visibility?: 'private' | 'inner-circle' | 'public'
 }
 
 serve(async (req) => {
@@ -60,7 +61,7 @@ serve(async (req) => {
     }
 
     const requestBody: UploadRequest = await req.json()
-    const { fileName, fileSize, contentType } = requestBody
+    const { fileName, fileSize, contentType, visibility = 'private' } = requestBody
 
     if (fileSize > MAX_FILE_SIZE) {
       return new Response(
@@ -105,15 +106,18 @@ serve(async (req) => {
       fileName: sanitizedFileName,
       filePath,
       fileSize,
-      contentType
+      contentType,
+      visibility
     })
+
+    const uploadOptions = visibility === 'public' 
+      ? { upsert: false }
+      : { upsert: false }
 
     const { data: uploadData, error: uploadError } = await supabase
       .storage
       .from('audio-uploads')
-      .createSignedUploadUrl(filePath, {
-        upsert: false
-      })
+      .createSignedUploadUrl(filePath, uploadOptions)
 
     if (uploadError) {
       console.error('Error creating signed upload URL:', uploadError)
@@ -129,15 +133,37 @@ serve(async (req) => {
       )
     }
 
-    const { data: publicUrlData } = supabase
-      .storage
-      .from('audio-uploads')
-      .getPublicUrl(filePath)
+    let fileUrl: string
+    
+    if (visibility === 'public') {
+      const { data: publicUrlData } = supabase
+        .storage
+        .from('audio-uploads')
+        .getPublicUrl(filePath)
+      fileUrl = publicUrlData.publicUrl
+    } else {
+      const { data: signedUrlData, error: signedUrlError } = await supabase
+        .storage
+        .from('audio-uploads')
+        .createSignedUrl(filePath, 3600) // 1 hour expiry
+      
+      if (signedUrlError) {
+        console.error('Error creating signed URL for private track:', signedUrlError)
+        const { data: publicUrlData } = supabase
+          .storage
+          .from('audio-uploads')
+          .getPublicUrl(filePath)
+        fileUrl = publicUrlData.publicUrl
+      } else {
+        fileUrl = signedUrlData.signedUrl
+      }
+    }
 
     const response = {
       uploadUrl: uploadData.signedUrl,
-      fileUrl: publicUrlData.publicUrl,
+      fileUrl: fileUrl,
       filePath: filePath,
+      visibility: visibility,
       expiresIn: 3600, // 1 hour
       bucket: 'audio-uploads'
     }

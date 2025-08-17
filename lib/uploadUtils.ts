@@ -49,7 +49,8 @@ export async function uploadTrackToSupabase(
       body: JSON.stringify({
         fileName: trackData.file.name,
         fileSize: trackData.file.size,
-        contentType: trackData.file.type
+        contentType: trackData.file.type,
+        visibility: trackData.visibility
       })
     });
 
